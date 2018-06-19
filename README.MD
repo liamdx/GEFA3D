@@ -6,4 +6,4 @@ Using LearnOpenGL.com to build up this project in to a game engine with toolset 
 
 # Current Progress
 
-![](https://media.giphy.com/media/c6NLOaYZVDn42Kq3Yw/giphy.gif "Demo")
+![](https://imgur.com/Lv711vQ.gif)
