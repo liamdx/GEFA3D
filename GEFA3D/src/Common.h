@@ -1,5 +1,14 @@
 #pragma once
 
+
+struct attenuation
+{
+	float constant;
+	float linear;
+	float quadratic;
+};
+
+
 #include "GL\glew.h"
 
 #include <GLFW/glfw3.h>

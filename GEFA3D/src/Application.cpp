@@ -1,12 +1,20 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+
 #include "Common.h"
 #include "Shader.h"
 #include "Camera.h"
-#include "Texture.h"
+#include "Model.h"
+#include "filesystem.h"
+//#include "Texture.h"
 #include "lighting\DirectionalLight.h"
 #include "lighting\PointLight.h"
+#include "lighting\SpotLight.h"
 
 std::string VertexFilepath = "res/default.vert";
 std::string FragmentFilepath = "res/default.frag";
+
+
 
 //Engine Time
 float deltaTime = 0.0f;
@@ -24,7 +32,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
+//lights
+PointLight pointLights[4];
+SpotLight spotLights[4];
 
 int main(void)
 {
@@ -159,11 +169,9 @@ int main(void)
 	mvp = projection * view * model;
 
 
-	Texture diffuseTexture("res/container2.png",0);
-	Texture specularTexture("res/container2_specular.png", 1);
+	//Texture diffuseTexture("res/container2.png",0);
+	//Texture specularTexture("res/container2_specular.png", 1);
 
-	std::cout << diffuseTexture.t_Slot << std::endl;
-	std::cout << specularTexture.t_Slot << std::endl;
 
 	
 	float timeValue;
@@ -191,12 +199,15 @@ int main(void)
 	};
 
 	DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.34f, 0.24f, 0.14f) ,glm::vec3(0.7f, 0.42f, 0.26f),glm::vec3(0.5f, 0.5f, 0.5f));
-	attenuation att = { 1.0f, 0.35f, 0.44f };
+	attenuation att = { 1.0f, 0.09f, 0.032f };
+
+	static std::string nanopath = "C:/Users/Liam/source/repos/GEFA3D/GEFA3D/res/nanosuit/nanosuit.obj";
+	Model nano(nanopath);
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
-		processInput(window);
+		processInput(window); 
 		timeValue = glfwGetTime();
 		offsetValue = (sin(timeValue) / 2.0f);
 		float currentFrame = glfwGetTime();
@@ -206,14 +217,17 @@ int main(void)
 		/* Render here */
 		//glClearColor(0.678f, 0.847f, 0.901f, 1.0f);
 		//glClearColor(0.0f, 0.749f, 0.647f, 1.0f);
-		glClearColor(0.18f, 0.02f, 0.05f, 0.4f);
+		//glClearColor(0.18f, 0.02f, 0.05f, 0.4f);
+		glClearColor(0.04f, 0.02f, 0.01f, 0.04f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		lightShader.use();
-		lightShader.setInt("mat.m_Diffuse", diffuseTexture.slot);
-		lightShader.setInt("mat.m_Specular", specularTexture.slot);
+		lightShader.setInt("NUMBER_OF_TEXTURES", 1);
+		//lightShader.setInt("mat.m_Diffuse[0]", diffuseTexture.slot);
+		lightShader.setInt("NOPL", 4);
+		lightShader.setInt("NOSL", 4);
+		//lightShader.setInt("mat.m_Specular[0]", specularTexture.slot);
 		lightShader.setVec3("viewPosition", cam.Position);
-		lightShader.setVec3("mat.m_Ambient", glm::vec3(0.135f,0.2225f,0.1575f));
 		lightShader.setFloat("mat.m_Shininess", 1.0f);
 
 		//change to include 1 dirLight , 4 point lights, 1 spot
@@ -227,51 +241,20 @@ int main(void)
 		lightShader.setFloat("light.quadratic", 0.032f);
 		*/
 
-		lightShader.setVec3("dirLight.direction", dirLight.direction);
-		lightShader.setVec3("dirLight.ambient", dirLight.ambient);
-		lightShader.setVec3("dirLight.diffuse", dirLight.diffuse);
-		lightShader.setVec3("dirLight.specular", dirLight.specular);
+		dirLight.Bind(lightShader);
 		view = cam.GetViewMatrix();
 
-
-			PointLight pointLight(glm::vec3(1.0), glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), att);
+		//render lights
+		for (int i = 0; i < 4; i++)
+		{
+			pointLights[i] = PointLight(glm::vec3(1.0 * i), glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.25f * i, 0.25f, 0.25f), glm::vec3(1.0f, 1.0f, 1.0f), att);
+			pointLights[i].Bind(lightShader, i);
+			spotLights[i] = SpotLight(glm::vec3(0.25f * i), glm::vec3(0.15f * i, 0.1f * i, 1.0 * i), 15.0f, 20.0f, glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.25f * i, 0.25f, 0.25f), glm::vec3(1.0f, 1.0f, 1.0f), att);
+			spotLights[i].Bind(lightShader, i);
+		}
 			
-			//Light 1
-			lightShader.setVec3("pointLights[0].position", pointLightPositions[0]);
-			lightShader.setVec3("pointLights[0].ambient", pointLight.ambient);
-			lightShader.setVec3("pointLights[0].diffuse", pointLight.diffuse);
-			lightShader.setVec3("pointLights[0].specular", pointLight.specular);
-			lightShader.setFloat("pointLights[0].constant", pointLight.att.constant);
-			lightShader.setFloat("pointLights[0].linear", pointLight.att.linear);
-			lightShader.setFloat("pointLights[0].quadratic", pointLight.att.quadratic);
-
-			//Light 2
-			lightShader.setVec3("pointLights[1].position", pointLightPositions[1]);
-			lightShader.setVec3("pointLights[1].ambient", pointLight.ambient);
-			lightShader.setVec3("pointLights[1].diffuse", pointLight.diffuse);
-			lightShader.setVec3("pointLights[1].specular", pointLight.specular);
-			lightShader.setFloat("pointLights[1].constant", pointLight.att.constant);
-			lightShader.setFloat("pointLights[1].linear", pointLight.att.linear);
-			lightShader.setFloat("pointLights[1].quadratic", pointLight.att.quadratic);
-
-			//Light 3
-			lightShader.setVec3("pointLights[2].position", pointLightPositions[2]);
-			lightShader.setVec3("pointLights[2].ambient", pointLight.ambient);
-			lightShader.setVec3("pointLights[2].diffuse", pointLight.diffuse);
-			lightShader.setVec3("pointLights[2].specular", pointLight.specular);
-			lightShader.setFloat("pointLights[2].constant", pointLight.att.constant);
-			lightShader.setFloat("pointLights[2].linear", pointLight.att.linear);
-			lightShader.setFloat("pointLights[2].quadratic", pointLight.att.quadratic);
-
-			//Light 4
-			lightShader.setVec3("pointLights[3].position", pointLightPositions[3]);
-			lightShader.setVec3("pointLights[3].ambient", pointLight.ambient);
-			lightShader.setVec3("pointLights[3].diffuse", pointLight.diffuse);
-			lightShader.setVec3("pointLights[3].specular", pointLight.specular);
-			lightShader.setFloat("pointLights[3].constant", pointLight.att.constant);
-			lightShader.setFloat("pointLights[3].linear", pointLight.att.linear);
-			lightShader.setFloat("pointLights[3].quadratic", pointLight.att.quadratic);
-
+	
+		//render light "objects" shows light position
 		for (unsigned int i = 0; i < 10; i++)
 		{
 			model = glm::mat4(1.0f);
@@ -288,8 +271,8 @@ int main(void)
 			lightShader.setMat4("mvp", mvp);
 			lightShader.setMat4("model", model);
 
-			diffuseTexture.Use();
-			specularTexture.Use();
+			//diffuseTexture.Use();
+			//specularTexture.Use();
 
 			glBindVertexArray(vao);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -302,14 +285,19 @@ int main(void)
 			model = glm::translate(model, pointLightPositions[i]);
 			model = glm::scale(model, glm::vec3(0.3f));
 			mvp = projection * view * model;
-			lampShader.setVec3("color", pointLight.diffuse);
+			lampShader.setVec3("color", glm::vec3(1.0));
 			lampShader.setMat4("mvp", mvp);
 
 			glBindVertexArray(lightVao);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 		
-		
+		lightShader.use();
+		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 5.0f));
+		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+		mvp = projection * view * model;
+		lightShader.setMat4("mvp", mvp);
+		nano.Draw(lightShader);
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
