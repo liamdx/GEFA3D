@@ -6,4 +6,4 @@ Using LearnOpenGL.com to build up this project in to a game engine with toolset 
 
 # Current Progress
 
-[Imgur] ! (http://imgur.com/4dFT9GE.jpg)
+![Imgur](http://imgur.com/4dFT9GE.jpg)
