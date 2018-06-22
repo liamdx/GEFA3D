@@ -42,3 +42,19 @@ void PointLight::Bind(Shader shader, unsigned int index)
 	shader.setFloat(s + "linear",att.linear);
 	shader.setFloat(s + "quadratic", att.quadratic);
 }
+
+void PointLight::Bind(Shader shader)
+{
+	std::stringstream ss;
+	ss << "debugLight.";
+	std::string s = ss.str();
+
+	shader.setVec3(s + "position", position);
+	shader.setVec3(s + "ambient", ambient);
+	shader.setVec3(s + "diffuse", diffuse);
+	shader.setVec3(s + "specular", specular);
+	shader.setFloat(s + "constant", att.constant);
+	shader.setFloat(s + "linear", att.linear);
+	shader.setFloat(s + "quadratic", att.quadratic);
+
+}

@@ -78,6 +78,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)deps\GLFW\include;$(SolutionDir)deps\GLEW\include;$(SolutionDir)GEFA3D\src\ext;$(SolutionDir)GEFA3D\src;$(SolutionDir)deps\assimp\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4496;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)deps\GLFW\lib-vc2015;$(SolutionDir)deps\GLEW\lib\Release\Win32;$(SolutionDir)deps\assimp\lib</AdditionalLibraryDirectories>
@@ -102,6 +103,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)deps\GLFW\include;$(SolutionDir)deps\GLEW\include;$(SolutionDir)GEFA3D\src\ext;$(SolutionDir)GEFA3D\src;$(SolutionDir)deps\assimp\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4496;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -126,6 +128,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\ext\imgui\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="src\lighting\DirectionalLight.cpp" />
     <ClCompile Include="src\ext\glm\detail\glm.cpp" />
     <ClCompile Include="src\ext\stb_image\stb_image.cpp" />
@@ -139,6 +145,13 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Common.h" />
     <ClInclude Include="src\ext\filesystem.h" />
+    <ClInclude Include="src\ext\imgui\imconfig.h" />
+    <ClInclude Include="src\ext\imgui\imgui.h" />
+    <ClInclude Include="src\ext\imgui\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="src\ext\imgui\imgui_internal.h" />
+    <ClInclude Include="src\ext\imgui\stb_rect_pack.h" />
+    <ClInclude Include="src\ext\imgui\stb_textedit.h" />
+    <ClInclude Include="src\ext\imgui\stb_truetype.h" />
     <ClInclude Include="src\lighting\DirectionalLight.h" />
     <ClInclude Include="src\ext\glm\common.hpp" />
     <ClInclude Include="src\ext\glm\detail\compute_vector_relational.hpp" />

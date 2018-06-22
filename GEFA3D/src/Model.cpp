@@ -11,6 +11,8 @@ void Model::loadModel(std::string path)
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 
+	std::cout << directory << std::endl;
+
 	processNode(scene->mRootNode, scene);
 }
 
@@ -89,6 +91,8 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
 	{
 		aiString str;
 		mat->GetTexture(type, i, &str);
+		std::cout << &str << std::endl;
+
 		bool shouldSkip = false;
 		
 		
@@ -105,9 +109,13 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
 		if (!shouldSkip)
 		{
 			Texture texture;
-			texture.t_Id = TextureFromFile(str.C_Str(), directory);
+			std::string textureLoadPath = directory + "/" + str.C_Str();
+
+			texture.t_Id = TextureFromFile(textureLoadPath.c_str(), directory);
 			texture.t_Type = typeName;
+			std::cout << typeName << std::endl;
 			texture.t_Path = str.C_Str();
+			std::cout << texture.t_Path << std::endl;
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);
 		}
@@ -119,6 +127,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
 int Model::TextureFromFile(char const *path, const std::string& directory)
 {
 	unsigned int id;
+	std::cout << path << std::endl;
 	glGenTextures(1, &id);
 
 	glBindTexture(GL_TEXTURE_2D, id);
@@ -130,6 +139,7 @@ int Model::TextureFromFile(char const *path, const std::string& directory)
 	// load and generate the texture
 	int width, height, nrChannels;
 	unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
+	std::cout << path << std::endl;
 	if (data)
 	{
 		GLenum format;

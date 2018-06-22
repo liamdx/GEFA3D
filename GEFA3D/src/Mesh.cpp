@@ -37,7 +37,8 @@ void Mesh::Draw(Shader shader)
 	shader.setInt("NUMBER_OF_TEXTURES", textures.size());
 	int diffuseCount = 0;
 	int specularCount = 0;
-	std::stringstream ss;
+	std::stringstream ss_d;
+	std::stringstream ss_s;
 	std::string s;
 
 	for (unsigned int i = 0; i < textures.size(); i++)
@@ -45,27 +46,29 @@ void Mesh::Draw(Shader shader)
 		glActiveTexture(GL_TEXTURE0 + i);
 		if (textures[i].t_Type == "diffuse")
 		{
-			ss.clear();
-			ss << "mat.m_Diffuse[" << diffuseCount << "]";
-			std::cout << ss.str() << std::endl;
-			s = ss.str();
-			shader.setFloat(s, i);
+			ss_d.clear();
+			ss_d << "mat.m_Diffuse[" << diffuseCount << "]";
+			s = ss_d.str();
+			shader.setInt(s, i);
 			diffuseCount += 1;
 			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
+			s.clear();
 		}
 		else if (textures[i].t_Type == "specular")
 		{
-			ss.clear();
-			ss << "mat.m_Specular[" << diffuseCount << "]";
-			s = ss.str();
+			ss_s.clear();
+			ss_s << "mat.m_Specular[" << specularCount << "]";
+			s = ss_s.str();
 			shader.setFloat(s, i);
 			specularCount += 1;
 			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
+			s.clear();
 		}
-
-		glActiveTexture(GL_TEXTURE0);
+		
+		
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(0);
 
 	}
