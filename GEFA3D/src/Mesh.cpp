@@ -6,6 +6,10 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 	this->indices = indices;
 	this->textures = textures;
 
+	calcMeshBounds();
+	std::cout << "Max X Boundary is " << xBound << std::endl;
+	std::cout << "Max Y Boundary is " << yBound << std::endl;
+	std::cout << "Max Z Boundary is " << zBound << std::endl;
 	setupMesh();
 }
 
@@ -73,3 +77,34 @@ void Mesh::Draw(Shader shader)
 
 	}
 }
+
+void Mesh::calcMeshBounds()
+{
+	float currentMaxX = 0.0f;
+	float currentMaxY = 0.0f;
+	float currentMaxZ = 0.0f;
+
+	for (unsigned int i = 0; i < vertices.size(); i++)
+	{
+		if(vertices[i].position.x > currentMaxX)
+		{
+			currentMaxX = vertices[i].position.x;
+		}
+
+		if (vertices[i].position.y > currentMaxY)
+		{
+			currentMaxY = vertices[i].position.y;
+		}
+
+		if (vertices[i].position.z > currentMaxZ)
+		{
+			currentMaxZ = vertices[i].position.z;
+		}
+	}
+
+	xBound = currentMaxX;
+	yBound = currentMaxY;
+	zBound = currentMaxZ;
+}
+
+

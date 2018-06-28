@@ -14,13 +14,16 @@ public:
 	}
 	inline void Draw(Shader shader) { for (unsigned int i = 0; i < meshes.size(); i++) { meshes[i].Draw(shader); } }
 	std::vector<Texture> textures_loaded;
-private:
 	std::vector<Mesh> meshes;
+	b3Vec3 position;
+	static int TextureFromFile(char const *path, const std::string& directory);
+
+private:
+
 	std::string directory;
-	
+
 	void loadModel(std::string path);
 	void processNode(aiNode *node, const aiScene *scene);
 	Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 	std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
-	int TextureFromFile(char const *path, const std::string& directory);
 };

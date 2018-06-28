@@ -36,6 +36,7 @@ struct DirLight
 struct PointLight
 {
 	vec3 position;
+	float intensity;
 
 	vec3 ambient;
 	vec3 diffuse;
@@ -115,9 +116,9 @@ vec3 calcPointLight(PointLight pointLight, vec3 normal, vec3 fragPosition, vec3 
 	specular = 3*(pointLight.specular * spec * vec3(texture(mat.m_Specular[0], vTexCoords)));
 
 
-	ambient *= attenuation;
-	diffuse *= attenuation;
-	specular *= attenuation;
+	ambient *= pointLight.intensity * attenuation;
+	diffuse *= pointLight.intensity * attenuation;
+	specular *= pointLight.intensity * attenuation;
 
 
 

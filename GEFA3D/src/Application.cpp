@@ -5,19 +5,19 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
+#include "MeshCollider.h"
+#include "primitives\Cube.h"
 #include "filesystem.h"
-//#include "Texture.h"
 #include "lighting\DirectionalLight.h"
 #include "lighting\PointLight.h"
 #include "lighting\SpotLight.h"
 #include "imgui\imgui.h"
 #include "imgui\imgui_impl_glfw_gl3.h"
 
-
-
 //Engine Time
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+const float timeStep = 1 / 60.0f;
 
 //camera;
 float lastX;
@@ -35,11 +35,30 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 PointLight pointLights[4];
 SpotLight spotLights[4];
 
+const unsigned int SCREEN_WIDTH = 1280;
+const unsigned int SCREEN_HEIGHT = 720;
 
+// We don't care for a profiler. This definition does nothing.
+void b3BeginProfileScope(const char* name)
+{
+
+}
+
+// We don't care for a profiler. This definition does nothing.
+void b3EndProfileScope()
+{
+
+}
 
 
 int main(void)
 {
+
+	
+	
+
+
+
 	//DEBUG
 	int  success;
 	char infoLog[512];
@@ -51,14 +70,17 @@ int main(void)
 		return -1;
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(1600, 900, "GEFA3D", NULL, NULL);
+	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "GEFA3D", NULL, NULL);
+	
+	//Does nothing until a frame buffer is set up
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glEnable(GL_MULTISAMPLE);
+
 	if (!window)
 	{
 		glfwTerminate();
 		return -1;
 	}
-
-
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
@@ -70,97 +92,98 @@ int main(void)
 
 	ImGui::CreateContext();
 	ImGui_ImplGlfwGL3_Init(window, true);
-	ImGui::StyleColorsLight();
+	ImGui::StyleColorsDark();
 	
 
 	//Mouse input handle
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
 
 
 	//Enable depth
 	glEnable(GL_DEPTH_TEST);
 
+	//Physics
+	//init
+	// The world gravity.
+	const b3Vec3 gravity(0.0f, -9.8f, 0.0f);
+	// The fixed time step size.
+	const float32 timeStep = 1.0f / 60.0f;
+	// Number of iterations for the velocity constraint solver.
+	const u32 velocityIterations = 8;
+	// Number of iterations for the position constraint solver.
+	const u32 positionIterations = 2;
+
+	//Create Physics world
+	// The world-> We allocate it using the heap but you can to it 
+	// on the stack if the stack is sufficiently large.
+	b3World* world = new b3World();
+	world->SetGravity(gravity);
+
+
+
+	// Create a static ground body at the world origin.
+	b3BodyDef groundDef;
+	b3Body* ground = world->CreateBody(groundDef);
+	// Create a box positioned at the world origin and 
+	// aligned with the world frame.
+	b3BoxHull groundBox;
+	// Set the ground box dimensions using a linear scale transform.
+	b3Transform scale;
+	scale.position.SetZero();
+	scale.rotation = b3Diagonal(100.0f, 1.0f, 100.0f);
+	groundBox.SetTransform(scale);
+	// Create the box physics wrapper.
+	b3HullShape groundShape;
+	groundShape.m_hull = &groundBox;
+	// Add the box to the ground body.
+	b3ShapeDef groundBoxDef;
+	groundBoxDef.shape = &groundShape;
+	ground->CreateShape(groundBoxDef);
+
+
+	// Create a dynamic body.
+	b3BodyDef bodyDef;
+	bodyDef.type = e_dynamicBody;
+	// Position the body 10 meters high from the world origin.
+	bodyDef.position.Set(0.0f, 100.0f, 0.0f);
+
+	// Set the initial angular velocity to pi radians (180 degrees) per second.
+	bodyDef.angularVelocity.Set(0.0f, B3_PI, 0.0f);
+	b3Body* body = world->CreateBody(bodyDef);
+	// Create a unit box positioned at the world origin and 
+	// aligned with the world frame.
+	b3BoxHull bodyBox;
+	bodyBox.SetIdentity();
+	// Create the box physics wrapper.
+	b3HullShape bodyShape;
+	bodyShape.m_hull = &bodyBox;
+
+	static std::string nanoPath = "C:/Users/lenovo/source/repos/GEFA3D/GEFA3D/res/nanosuit/nanosuit.obj";
+	Model nano(nanoPath);
+	static std::string terrainPath = "C:/Users/lenovo/source/repos/GEFA3D/GEFA3D/res/sponza_obj/sponza.obj";
+	Model terrain(terrainPath);
+
+	b3Capsule capsule = b3Capsule_identity;
+	capsule.radius = 2.0f;
+	b3CapsuleShape capsuleShape;
+	capsuleShape.m_centers[0].Set(0.0f, 0.5f, 0.0f);
+	capsuleShape.m_centers[1].Set(0.0f, -0.5f, 0.0f);
+	capsuleShape.m_radius = 2.0f;
+
+
+	// Add the box to the body.
+	b3ShapeDef bodyBoxDef;
+	bodyBoxDef.shape = &capsuleShape;
+	bodyBoxDef.density = 500.0f;
+	body->CreateShape(bodyBoxDef);
+
+
 	Shader lightShader("res/light.vert", "res/light.frag");
 	Shader lampShader("res/lamp.vert", "res/lamp.frag");
 
-	float vertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-	};
-
-	//cube VAO
-	unsigned int vao;
-	unsigned int vbo;
-	glGenVertexArrays(1, &vao);
-	//Bind the buffers and vertex attribute(s), vao
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glBindVertexArray(vao);
-	//Create a vertex attribute (layout = 0 in shader)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	//normal attribute 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	//texture coords attribute 
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	//texture attribute 
-	//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
-	
-	//light vao
-	unsigned int lightVao;
-	glGenVertexArrays(1, &lightVao);
-	glBindVertexArray(lightVao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	//Create a vertex attribute (layout = 0 in shader)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	
+	Cube cube("C:/Users/lenovo/source/repos/GEFA3D/GEFA3D/res/green.jpg");
 	
 
 
@@ -173,7 +196,7 @@ int main(void)
 	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	//projection
 	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(cam.Zoom, 1600.0f / 900.0f , 0.1f, 100.0f);
+	projection = glm::perspective(cam.Zoom, (float)SCREEN_WIDTH / SCREEN_HEIGHT , 0.1f, 100.0f);
 	
 	glm::mat4 mvp = glm::mat4(1.0f);
 	mvp = projection * view * model;
@@ -211,44 +234,24 @@ int main(void)
 	//DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.14f, 0.13f, 0.14f) ,glm::vec3(0.2f, 0.12f, 0.13f),glm::vec3(0.2f, 0.2f, 0.2f));
 	DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.01f, 0.01f, 0.01f));
 	attenuation att = { 1.0f, 0.22f, 0.2f };
-	PointLight pl = PointLight(glm::vec3(1.0), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.25f, 1.25f), glm::vec3(1.0f, 1.0f, 1.0f), att);
-
-	std::string filepath = __FILE__;
-	for (int i = 0; i < 15; i++)
-	{
-		filepath.pop_back();
-	}
-	std::cout << filepath << std::endl;
+	PointLight pl = PointLight(glm::vec3(1.0), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.25f, 1.25f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, att);
 
 
-	static std::string nanoPath = "C:/Users/Liam/source/repos/GEFA3D/GEFA3D/res/nanosuit/nanosuit.obj";
-	Model nano(nanoPath);
-	static std::string terrainPath = "C:/Users/Liam/source/repos/GEFA3D/GEFA3D/res/sponza_obj/sponza.obj";
-	Model terrain(terrainPath);
+	
 
-	bool show_demo_window = true;
-	bool show_another_window = false;
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	ImVec4 lightposition = ImVec4(0.571f, 0.286f, 2.60f, 1.00f);
+	ImVec4 lightposition = ImVec4(0.571f, 10.286f, 2.60f, 1.00f);
 	ImVec4 lightambient = ImVec4(0.5f, 0.5f, 0.5f, 1.00f);
 	ImVec4 lightdiffuse = ImVec4(3.429f, 2.0f, 3.429f, 1.00f);
 	ImVec4 lightspecular = ImVec4(3.429f, 2.0f, 3.429f, 1.00f);
 	ImVec4 lightattenuation = ImVec4(1.0, 0.22f, 0.20f, 1.00f);
-	ImVec4 nanoposition = ImVec4(0.45f, -3.429f, 0.60f, 1.00f);
+	float lightintensity = 1.0f;
+	ImVec4 nanoposition = ImVec4(0.45f, 0.0f, 0.60f, 1.00f);
 
-	for (int i = 0; i < nano.textures_loaded.size(); i++)
-	{
-		std::cout << nano.textures_loaded[i].t_Id << std::endl;
-		std::cout << nano.textures_loaded[i].t_Path << std::endl;
-		std::cout << nano.textures_loaded[i].t_Type << std::endl;
-	}
-	for (int i = 0; i < terrain.textures_loaded.size(); i++)
-	{
-		std::cout << terrain.textures_loaded[i].t_Id << std::endl;
-		std::cout << terrain.textures_loaded[i].t_Path << std::endl;
-		std::cout << terrain.textures_loaded[i].t_Type << std::endl;
-	}
+	cam.Position = glm::vec3(0.0, 9.0, 10.0);
 	/* Loop until the user closes the window */
+				//LOOP//
+	
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window); 
@@ -257,14 +260,14 @@ int main(void)
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-
+		// Perform a time step of the world in this frame.
+		world->Step(deltaTime, velocityIterations, positionIterations);
 		ImGui_ImplGlfwGL3_NewFrame();
-
+		//world.update(deltaTime);
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		//glClearColor(0.701f, 0.839f, 0.972f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-
 
 		/* Render here */
 		//glClearColor(0.678f, 0.847f, 0.901f, 1.0f);
@@ -275,12 +278,10 @@ int main(void)
 
 		lightShader.use();
 		lightShader.setInt("NUMBER_OF_TEXTURES", 1);
-		//lightShader.setInt("mat.m_Diffuse[0]", diffuseTexture.slot);
 		lightShader.setInt("NOPL", 1);
 		lightShader.setInt("NOSL", 0);
-		//lightShader.setInt("mat.m_Specular[0]", specularTexture.slot);
 		lightShader.setVec3("viewPosition", cam.Position);
-		lightShader.setFloat("mat.m_Shininess", 32.0f);
+		lightShader.setFloat("mat.m_Shininess", 64.0f);
 
 		//change to include 1 dirLight , 4 point lights, 1 spot
 		/*lightShader.setVec3("light.l_Ambient", glm::vec3(0.2f, 0.2f, 0.2f));
@@ -310,14 +311,21 @@ int main(void)
 		pl.setDiffuse(glm::vec3(lightdiffuse.x, lightdiffuse.y, lightdiffuse.z));
 		pl.setSpecular(glm::vec3(lightspecular.x, lightspecular.y, lightspecular.z));
 		pl.setAttenuation(glm::vec3(lightattenuation.x, lightattenuation.y, lightattenuation.z));
+		pl.setIntensity(lightintensity);
 
 		pl.Bind(lightShader);
 		
 		
-		
+		b3Vec3 position = body->GetPosition();
+		b3Quat orientation = body->GetOrientation();
+		b3Vec3 axis;
+		float32 angle;
+		orientation.GetAxisAngle(&axis, &angle);
 		lightShader.use();
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(nanoposition.x, nanoposition.y, nanoposition.z));
+		//model = glm::translate(model, glm::vec3(nanoposition.x, nanoposition.y, nanoposition.z));
+		model = glm::translate(model, glm::vec3(position.x, position.y, position.z));
+		model = glm::rotate(model, angle, glm::vec3(axis.x, axis.y,axis.z));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		mvp = projection * view * model;
 		lightShader.setMat4("model", model);
@@ -325,7 +333,7 @@ int main(void)
 		nano.Draw(lightShader);
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(0.0f, -3.75f, 5.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 3.5f, 5.0f));
 		model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
 		mvp = projection * view * model;
 		lightShader.setMat4("model", model);
@@ -339,8 +347,7 @@ int main(void)
 		mvp = projection * view * model;
 		lampShader.setMat4("mvp", mvp);
 		lampShader.setVec3("color", pl.diffuse);
-		glBindVertexArray(lightVao);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		cube.Draw(lampShader);
 
 		//ui stuff
 		// 1. Show a simple window.
@@ -350,13 +357,18 @@ int main(void)
 			static int counter = 0;
 			ImGui::Text("Debug");                           // Display some text (you can use a format string too)        // Edit 1 float using a slider from 0.0f to 1.0f    
 			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-			ImGui::SliderFloat3("suit pos", &nanoposition.x, -10, 10);
-			ImGui::SliderFloat3("light pos", &lightposition.x, -10, 10);
-			ImGui::SliderFloat3("light ambient", &lightambient.x, -10, 10);
-			ImGui::SliderFloat3("light diffuse", &lightdiffuse.x, -10, 10);
-			ImGui::SliderFloat3("light specular", &lightspecular.x, -10, 10);
+			//ImGui::SliderFloat3("suit pos", &nanoposition.x, -10, 10);
+			ImGui::SliderFloat3("light pos", &lightposition.x, -100, 100);
+			ImGui::SliderFloat("Light intensity", &lightintensity, 0, 25);
+			ImGui::ColorEdit3("light ambient", (float*)&lightambient);
+			ImGui::ColorEdit3("light diffuse", (float*)&lightdiffuse);
+			ImGui::ColorEdit3("light specular", (float*)&lightspecular);
 			ImGui::InputFloat3("light attenuation", &lightattenuation.x, -2, 2);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			if (ImGui::Button("addForce"))
+			{
+				body->ApplyForce(b3Vec3(10000, 10000.0f, 0), b3Vec3(1, 0, 0), true);
+			}
 		}
 
 		//ui render
@@ -378,10 +390,6 @@ int main(void)
 
 	glfwTerminate();
 	return 0;
-}
-
-float clip(float n, float lower, float upper) {
-	return std::max(lower, std::min(n, upper));
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -418,6 +426,7 @@ void processInput(GLFWwindow *window)
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
 	}
+
 		
 		
 

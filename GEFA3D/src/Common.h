@@ -8,6 +8,9 @@ struct attenuation
 	float quadratic;
 };
 
+enum PhysicsType {
+	PTStatic, PTDynamic
+};
 
 #include "GL\glew.h"
 
@@ -30,3 +33,5 @@ struct attenuation
 #include <iostream>
 
 #include "ext\stb_image\stb_image.h"
+
+#include "bounce\bounce.h"
