@@ -10,10 +10,12 @@ out vec2 vTexCoords;
 
 uniform mat4 mvp;
 uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 void main()
 {
-	gl_Position = mvp * vec4(position, 1.0);
+	gl_Position = projection * view * model * vec4(position, 1.0);
 	fragPosition = vec3(model * vec4(position,1.0));
 	normal = mat3(transpose(inverse(model))) * inNormal;
 	vTexCoords = texCoords;

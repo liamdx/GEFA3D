@@ -2,7 +2,7 @@
 
 #include "Common.h"
 #include "Shader.h"
-
+#include "Transform.h"
 struct Vertex {
 	glm::vec3 position;
 	glm::vec3 normal;
@@ -24,13 +24,14 @@ public:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
-	//physics position;
-	b3Vec3 position;
 
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	void Draw(Shader shader);
 	void calcMeshBounds();
 
+	//physics position;
+	b3MeshShape collisionShape;
+	Transform transform;
 private:
 	unsigned int vao, vbo, ibo;
 	void setupMesh();

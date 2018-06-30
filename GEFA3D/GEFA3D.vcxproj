@@ -311,6 +311,7 @@
     <ClInclude Include="src\primitives\Cube.h" />
     <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\default.frag" />

@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Model.h"
 #include "MeshCollider.h"
+#include "GameObject.h"
 #include "primitives\Cube.h"
 #include "filesystem.h"
 #include "lighting\DirectionalLight.h"
@@ -53,12 +54,6 @@ void b3EndProfileScope()
 
 int main(void)
 {
-
-	
-	
-
-
-
 	//DEBUG
 	int  success;
 	char infoLog[512];
@@ -93,13 +88,11 @@ int main(void)
 	ImGui::CreateContext();
 	ImGui_ImplGlfwGL3_Init(window, true);
 	ImGui::StyleColorsDark();
-	
 
 	//Mouse input handle
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
-
 
 	//Enable depth
 	glEnable(GL_DEPTH_TEST);
@@ -121,8 +114,6 @@ int main(void)
 	b3World* world = new b3World();
 	world->SetGravity(gravity);
 
-
-
 	// Create a static ground body at the world origin.
 	b3BodyDef groundDef;
 	b3Body* ground = world->CreateBody(groundDef);
@@ -141,14 +132,13 @@ int main(void)
 	b3ShapeDef groundBoxDef;
 	groundBoxDef.shape = &groundShape;
 	ground->CreateShape(groundBoxDef);
-
-
 	// Create a dynamic body.
 	b3BodyDef bodyDef;
 	bodyDef.type = e_dynamicBody;
+	bodyDef.fixedRotationX = true;
+	bodyDef.fixedRotationZ = true;
 	// Position the body 10 meters high from the world origin.
 	bodyDef.position.Set(0.0f, 100.0f, 0.0f);
-
 	// Set the initial angular velocity to pi radians (180 degrees) per second.
 	bodyDef.angularVelocity.Set(0.0f, B3_PI, 0.0f);
 	b3Body* body = world->CreateBody(bodyDef);
@@ -160,9 +150,10 @@ int main(void)
 	b3HullShape bodyShape;
 	bodyShape.m_hull = &bodyBox;
 
-	static std::string nanoPath = "C:/Users/lenovo/source/repos/GEFA3D/GEFA3D/res/nanosuit/nanosuit.obj";
+	std::string nanoPath = "C:/Users/lenovo/Documents/GitHub/GEFA3D/GEFA3D/res/nanosuit/nanosuit.obj";
 	Model nano(nanoPath);
-	static std::string terrainPath = "C:/Users/lenovo/source/repos/GEFA3D/GEFA3D/res/sponza_obj/sponza.obj";
+	
+	std::string terrainPath = "C:/Users/lenovo/Documents/GitHub/GEFA3D/GEFA3D/res/sponza_obj/sponza.obj";
 	Model terrain(terrainPath);
 
 	b3Capsule capsule = b3Capsule_identity;
@@ -176,16 +167,15 @@ int main(void)
 	// Add the box to the body.
 	b3ShapeDef bodyBoxDef;
 	bodyBoxDef.shape = &capsuleShape;
-	bodyBoxDef.density = 500.0f;
+	bodyBoxDef.density = 10.0f;
 	body->CreateShape(bodyBoxDef);
 
 
 	Shader lightShader("res/light.vert", "res/light.frag");
 	Shader lampShader("res/lamp.vert", "res/lamp.frag");
 
-	Cube cube("C:/Users/lenovo/source/repos/GEFA3D/GEFA3D/res/green.jpg");
-	
-
+	Cube cube("C:/Users/lenovo/Documents/GitHub/GEFA3D/GEFA3D/res/green.jpg");
+	GameObject crysisObject(nanoPath, lightShader, world);
 
 	//mvp
 
@@ -232,9 +222,9 @@ int main(void)
 	};
 
 	//DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.14f, 0.13f, 0.14f) ,glm::vec3(0.2f, 0.12f, 0.13f),glm::vec3(0.2f, 0.2f, 0.2f));
-	DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.01f, 0.01f, 0.01f));
+	DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.13f, 0.04f, 0.01f), glm::vec3(1.01f, 1.01f, 1.01f));
 	attenuation att = { 1.0f, 0.22f, 0.2f };
-	PointLight pl = PointLight(glm::vec3(1.0), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.25f, 1.25f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, att);
+	PointLight pl = PointLight(glm::vec3(1.0), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.70f, 0.25f, 0.25f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, att);
 
 
 	
@@ -247,6 +237,7 @@ int main(void)
 	ImVec4 lightattenuation = ImVec4(1.0, 0.22f, 0.20f, 1.00f);
 	float lightintensity = 1.0f;
 	ImVec4 nanoposition = ImVec4(0.45f, 0.0f, 0.60f, 1.00f);
+	ImVec4 testposition = ImVec4(0.45f, 2.0f, 0.60f, 1.00f);
 
 	cam.Position = glm::vec3(0.0, 9.0, 10.0);
 	/* Loop until the user closes the window */
@@ -327,9 +318,9 @@ int main(void)
 		model = glm::translate(model, glm::vec3(position.x, position.y, position.z));
 		model = glm::rotate(model, angle, glm::vec3(axis.x, axis.y,axis.z));
 		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
-		mvp = projection * view * model;
 		lightShader.setMat4("model", model);
-		lightShader.setMat4("mvp", mvp);
+		lightShader.setMat4("view", view);
+		lightShader.setMat4("projection", projection);
 		nano.Draw(lightShader);
 
 		model = glm::mat4(1.0);
@@ -337,15 +328,21 @@ int main(void)
 		model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
 		mvp = projection * view * model;
 		lightShader.setMat4("model", model);
-		lightShader.setMat4("mvp", mvp);
+		lightShader.setMat4("view", view);
+		lightShader.setMat4("projection", projection);
 		terrain.Draw(lightShader);
+
+		crysisObject.g_Transform.position = glm::vec3(testposition.x, testposition.y, testposition.z);
+		crysisObject.Draw();
 
 		lampShader.use();
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(lightposition.x, lightposition.y, lightposition.z));
 		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
 		mvp = projection * view * model;
-		lampShader.setMat4("mvp", mvp);
+		lampShader.setMat4("model", model);
+		lampShader.setMat4("view", view);
+		lampShader.setMat4("projection", projection);
 		lampShader.setVec3("color", pl.diffuse);
 		cube.Draw(lampShader);
 
@@ -359,6 +356,7 @@ int main(void)
 			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 			//ImGui::SliderFloat3("suit pos", &nanoposition.x, -10, 10);
 			ImGui::SliderFloat3("light pos", &lightposition.x, -100, 100);
+			ImGui::SliderFloat3("mario pos", &testposition.x, -100, 100);
 			ImGui::SliderFloat("Light intensity", &lightintensity, 0, 25);
 			ImGui::ColorEdit3("light ambient", (float*)&lightambient);
 			ImGui::ColorEdit3("light diffuse", (float*)&lightdiffuse);
