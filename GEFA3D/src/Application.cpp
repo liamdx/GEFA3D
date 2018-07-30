@@ -212,12 +212,12 @@ int main(void)
 
 	std::vector<std::string> faces
 	{
-		"res/textures/purplevalley/purplevalley_rt.tga",
-		"res/textures/purplevalley/purplevalley_lf.tga",
-		"res/textures/purplevalley/purplevalley_up.tga",
-		"res/textures/purplevalley/purplevalley_dn.tga",
-		"res/textures/purplevalley/purplevalley_bk.tga",
-		"res/textures/purplevalley/purplevalley_ft.tga"
+		"res/textures/violentdays/violentdays_rt.tga",
+		"res/textures/violentdays/violentdays_lf.tga",
+		"res/textures/violentdays/violentdays_up.tga",
+		"res/textures/violentdays/violentdays_dn.tga",
+		"res/textures/violentdays/violentdays_bk.tga",
+		"res/textures/violentdays/violentdays_ft.tga"
 	};
 	Cubemap cubeMap(faces);
 
@@ -265,13 +265,12 @@ int main(void)
 	};
 
 
-	DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.05f, 0.08f,0.161f), glm::vec3(0.6f, 0.58f, 0.97f), glm::vec3(0.51f, 0.31f, 0.801f));
-	attenuation att = { 1.0f, 0.7f, 1.8f };
+	DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.15f, 0.08f,0.061f), glm::vec3(0.96f, 0.48f, 0.27f), glm::vec3(0.91f, 0.31f, 0.101f));
 
 	//create pointlights
 	for (unsigned int i = 0; i < pointLightPositions.size(); i++)
 	{
-		pointLights.push_back(PointLight(pointLightPositions[i], glm::vec3(0.01, 0.01, 0.01), glm::vec3(0.5, 0.4, 1.0), glm::vec3(0.5, 0.4, 1.0), 1.65f, att));
+		pointLights.push_back(PointLight(pointLightPositions[i], glm::vec3(0.01, 0.01, 0.01), glm::vec3(1.0, 0.4, 0.2), glm::vec3(1.0, 0.5, 0.2), 0.65f, 7.9f));
 
 	}
 
@@ -318,6 +317,7 @@ int main(void)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	cubeMap.Bind(reflectionMapShader);
+	
 	
 	//GameObject stuff
 	//Object testobject("testObject");
@@ -386,16 +386,16 @@ int main(void)
 			}
 
 			glStencilMask(0x00);
-			lightShader.use();
 
 			model = glm::mat4(1.0);
 			model = glm::translate(model, glm::vec3(0.0f, 3.5f, 5.0f));
 			model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
-			mvp = projection * view * model;
-			lightShader.setMat4("model", model);
-			lightShader.setMat4("view", view);
-			lightShader.setMat4("projection", projection);
-			terrain.Draw(lightShader);
+			reflectionMapShader.use();
+			reflectionMapShader.setMat4("model", model);
+			reflectionMapShader.setMat4("view", view);
+			reflectionMapShader.setMat4("projection", projection);
+			reflectionMapShader.setVec3("viewPosition", cam.Position);
+			terrain.Draw(reflectionMapShader);
 
 			b3Vec3 position = body->GetPosition();
 			b3Quat orientation = body->GetOrientation();
@@ -477,6 +477,7 @@ int main(void)
 
 			cubeMap.Draw(cubemapShader, view, projection);
 
+			glEnable(GL_FRAMEBUFFER_SRGB);
 			//Framebuffer time
 			// second pass
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
@@ -487,7 +488,7 @@ int main(void)
 			fbShader.use();
 			renderQuad.Draw(fbShader, "screenTexture", framebufferTexture);
 
-
+			glDisable(GL_FRAMEBUFFER_SRGB);
 
 
 			//ui stuff

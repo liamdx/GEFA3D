@@ -32,6 +32,8 @@ public:
 class GameObject : Object
 {
 private:
+	std::vector<std::unique_ptr<EngineComponent>> components;
+public:
 	GameObject(std::string name, Shader shader) : Object(name), shader(shader) {};
 
 	std::string name;

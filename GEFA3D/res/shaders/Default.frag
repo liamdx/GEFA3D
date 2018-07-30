@@ -45,9 +45,7 @@ struct PointLight
 	vec3 diffuse;
 	vec3 specular;
 
-	float constant;
-	float linear;
-	float quadratic;
+	float distance;
 };
 
 in vec3 normal;
@@ -74,18 +72,23 @@ vec3 calcReflection(vec3 Normal, vec3 FragPosition) {
 	vec3 I = normalize(fragPosition - viewPosition);
     vec3 R = reflect(I, normalize(Normal));
 
+	//vec3 reflection = texture(skybox, R).rgb * vec3(texture(mat.m_Reflection, vTexCoords));
+	
 	vec3 reflection = texture(skybox, R).rgb * vec3(texture(mat.m_Reflection, vTexCoords));
-	//reflection += texture(skybox, R).rgb * vec3(texture(mat.m_Specular, vTexCoords));
-	return reflection * 0.48f;
+	return reflection * 0.28f;
 }
 //back to usual
 
 vec3 calcDirLight(DirLight dirLight, vec3 normal, vec3 fragPosition, vec3 viewDir)
 {
-	vec3 lightDir = normalize(-dirLight.direction);
+	//vec3 lightDir = normalize(-dirLight.direction);
+	vec3 lightDir = normalize(dirLight.direction - fragPosition);
+	vec3 viewDirection = normalize(viewPosition - fragPosition);
+	vec3 halfwayDir = normalize(lightDir + viewDirection);
+
 	float diff = max(dot(normal, lightDir), 0.0);
 	vec3 reflectDir = reflect(-lightDir,normal);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.m_Shininess);
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), mat.m_Shininess);
     //vec3 I = normalize(fragPosition - viewPosition);
     //vec3 R = refract(I, normalize(normal),ratio);
 	//vec3 R = reflect(I, normalize(normal));
@@ -98,8 +101,8 @@ vec3 calcDirLight(DirLight dirLight, vec3 normal, vec3 fragPosition, vec3 viewDi
 	
 	ambient = dirLight.ambient * vec3(texture(mat.m_Diffuse, vTexCoords));
 	diffuse = dirLight.diffuse * diff * vec3(texture(mat.m_Diffuse, vTexCoords));
-	specular = 3*(dirLight.specular * spec * vec3(texture(mat.m_Specular, vTexCoords)));
-	reflection = dirLight.ambient * calcReflection(normal, fragPosition);
+	specular = dirLight.specular * spec * vec3(texture(mat.m_Specular, vTexCoords));
+	reflection = calcReflection(normal, fragPosition);
 
 
 
@@ -109,16 +112,16 @@ vec3 calcDirLight(DirLight dirLight, vec3 normal, vec3 fragPosition, vec3 viewDi
 
 vec3 calcPointLight(PointLight pointLight, vec3 normal, vec3 fragPosition, vec3 viewDir)
 {
-	vec3 lightDir = normalize(pointLight.position - fragPosition);
-	vec3 reflectDir = reflect(-lightDir,normal);
-    //vec3 I = normalize(fragPosition - viewPosition);
-    //vec3 R = refract(I, normalize(normal),ratio);
-	//vec3 R = reflect(I, normalize(normal));
-	float diff = max(dot(normal, lightDir), 0.0);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.m_Shininess);
+	//vec3 lightDir = normalize(pointLight.position - fragPosition);
+	vec3 lightDir = normalize(dirLight.direction - fragPosition);
+	vec3 reflectDir = reflect(-lightDir,normal);	
+	vec3 viewDirection = normalize(viewPosition - fragPosition);
+	vec3 halfwayDir = normalize(lightDir + viewDirection);
 
-	float distance = length(pointLight.position - fragPosition);
-	float attenuation = 1.0 / (pointLight.constant + pointLight.linear * distance + pointLight.quadratic * (distance * distance));
+	float diff = max(dot(normal, lightDir), 0.0);
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), mat.m_Shininess);
+
+	float attenuation = 1.0 / pointLight.distance;
 
 	vec3 ambient;
 	vec3 diffuse;
@@ -130,8 +133,8 @@ vec3 calcPointLight(PointLight pointLight, vec3 normal, vec3 fragPosition, vec3 
 
 	ambient = pointLight.ambient * vec3(texture(mat.m_Diffuse, vTexCoords));
 	diffuse = pointLight.diffuse * diff * vec3(texture(mat.m_Diffuse, vTexCoords));
-	specular = 3*(pointLight.specular * spec * vec3(texture(mat.m_Specular, vTexCoords)));
-    reflection = pointLight.diffuse * calcReflection(normal, fragPosition);
+	specular = pointLight.specular * spec * vec3(texture(mat.m_Specular, vTexCoords));
+    reflection = calcReflection(normal, fragPosition);
 
 	ambient *= pointLight.intensity * attenuation;
 	diffuse *= pointLight.intensity * attenuation;
@@ -195,7 +198,6 @@ vec3 calcSpotLight(SpotLight spotLight, vec3 normal, vec3 fragPosition, vec3 vie
 
 void main()
 {
-	
 	vec3 norm = normalize(normal);
 	vec3 viewDirection = normalize(viewPosition - fragPosition);
 
@@ -218,6 +220,5 @@ void main()
 	}
 
 	FragColor = vec4(result, 1.0);
-
 }
 

@@ -38,6 +38,10 @@ void main()
     for(int i = 0; i < 9; i++)
         col += sampleTex[i] * kernel[i];
     
-    FragColor = vec4(col, 1.0);
+    vec4 fragColor = vec4(col, 1.0);
+
+    float gamma = 0.78;
+	FragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
+
 
 }
