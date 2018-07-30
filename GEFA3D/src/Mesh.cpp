@@ -1,18 +1,5 @@
 #include "Mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
-{
-	this->vertices = vertices;
-	this->indices = indices;
-	this->textures = textures;
-
-	calcMeshBounds();
-	std::cout << "Max X Boundary is " << xBound << std::endl;
-	std::cout << "Max Y Boundary is " << yBound << std::endl;
-	std::cout << "Max Z Boundary is " << zBound << std::endl;
-	setupMesh();
-}
-
 void Mesh::setupMesh()
 {
 	glGenVertexArrays(1, &vao);
@@ -41,8 +28,10 @@ void Mesh::Draw(Shader shader)
 	shader.setInt("NUMBER_OF_TEXTURES", textures.size());
 	int diffuseCount = 0;
 	int specularCount = 0;
+	int reflectionCount= 0;
 	std::stringstream ss_d;
 	std::stringstream ss_s;
+	std::stringstream ss_r;
 	std::string s;
 
 	for (unsigned int i = 0; i < textures.size(); i++)
@@ -51,7 +40,8 @@ void Mesh::Draw(Shader shader)
 		if (textures[i].t_Type == "diffuse")
 		{
 			ss_d.clear();
-			ss_d << "mat.m_Diffuse[" << diffuseCount << "]";
+			//ss_d << "mat.m_Diffuse[" << diffuseCount << "]";
+			ss_d << "mat.m_Diffuse";
 			s = ss_d.str();
 			shader.setInt(s, i);
 			diffuseCount += 1;
@@ -61,14 +51,25 @@ void Mesh::Draw(Shader shader)
 		else if (textures[i].t_Type == "specular")
 		{
 			ss_s.clear();
-			ss_s << "mat.m_Specular[" << specularCount << "]";
+			//ss_s << "mat.m_Specular[" << specularCount << "]";
+			ss_s << "mat.m_Specular";
 			s = ss_s.str();
-			shader.setFloat(s, i);
+			shader.setInt(s, i);
 			specularCount += 1;
 			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
 			s.clear();
 		}
-		
+		else if (textures[i].t_Type == "reflection")
+		{
+			ss_r.clear();
+			//ss_r << "mat.m_Reflection[" << reflectionCount << "]";
+			ss_r << "mat.m_Reflection";
+			s = ss_r.str();
+			shader.setInt(s, i);
+			reflectionCount += 1;
+			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
+			s.clear();
+		}
 		
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -77,6 +78,7 @@ void Mesh::Draw(Shader shader)
 
 	}
 }
+
 
 void Mesh::calcMeshBounds()
 {
@@ -106,5 +108,3 @@ void Mesh::calcMeshBounds()
 	yBound = currentMaxY;
 	zBound = currentMaxZ;
 }
-
-

@@ -1,6 +1,6 @@
 #include "SpotLight.h"
 
-SpotLight::SpotLight(glm::vec3 position, glm::vec3 direction, float innerCutoff, float outerCutoff, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, attenuation att)
+SpotLight::SpotLight(glm::vec3 position, glm::vec3 direction, float innerCutoff, float outerCutoff, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float intensity, attenuation att)
 {
 	this->position = position;
 	this->direction = direction;
@@ -9,6 +9,7 @@ SpotLight::SpotLight(glm::vec3 position, glm::vec3 direction, float innerCutoff,
 	this->ambient = ambient;
 	this->diffuse = diffuse;
 	this->specular = specular;
+	this->intensity = intensity;
 	this->att = att;
 }
 
@@ -24,7 +25,7 @@ SpotLight::SpotLight()
 	this->specular = glm::vec3(0.0f);
 	this->att = defaultAtt;
 }
-void SpotLight::initialize(glm::vec3 position, glm::vec3 direction, float innerCutoff, float outerCutoff, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, attenuation att)
+void SpotLight::initialize(glm::vec3 position, glm::vec3 direction, float innerCutoff, float outerCutoff, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float intensity, attenuation att)
 {
 	this->position = position;
 	this->direction = direction;
@@ -33,6 +34,7 @@ void SpotLight::initialize(glm::vec3 position, glm::vec3 direction, float innerC
 	this->ambient = ambient;
 	this->diffuse = diffuse;
 	this->specular = specular;
+	this->intensity = intensity;
 	this->att = att;
 }
 
@@ -49,6 +51,7 @@ void SpotLight::Bind(Shader shader, unsigned int index)
 	shader.setVec3(s + "specular", specular);
 	shader.setFloat(s + "innerCutoff", innerCutoff);
 	shader.setFloat(s + "outerCutoff", outerCutoff);
+	shader.setFloat(s + "intensity", intensity);
 	shader.setFloat(s + "constant", att.constant);
 	shader.setFloat(s + "linear", att.linear);
 	shader.setFloat(s + "quadratic", att.quadratic);

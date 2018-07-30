@@ -83,6 +83,10 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
+		//Assimp throws issues when importing reflection maps correctly, nano model stores 
+		//Reflection maps as ambient maps, this will obviously need corrected when PBR is implemented
+		std::vector<Texture> reflectionMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "reflection");
+		textures.insert(textures.end(), reflectionMaps.begin(), reflectionMaps.end());
 	}
 
 	return Mesh(vertices, indices, textures);
@@ -174,7 +178,7 @@ int Model::TextureFromFile(char const *path, const std::string& directory)
 	}
 	else
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		std::cout << "Failed to load texture " << path << std::endl;
 		stbi_image_free(data);
 		return NULL;
 	}

@@ -78,6 +78,7 @@ Shader::Shader(const char* vertexPath, const char* fragPath)
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetProgramInfoLog(id, 512, NULL, infoLog);
+		std::cout << vertexPath << std::endl;
 		std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 

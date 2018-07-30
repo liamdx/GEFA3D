@@ -63,6 +63,18 @@
     <ClCompile Include="src\primitives\Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\primitives\Quad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DebugEngineComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Cubemap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Common.h">
@@ -566,6 +578,24 @@
     <ClInclude Include="src\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\primitives\Quad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EngineComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DebugEngineComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FrameBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Cubemap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\ext\glm\detail\func_common.inl">
@@ -919,12 +949,20 @@
     <None Include="src\ext\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="res\default.vert" />
-    <None Include="res\default.frag" />
-    <None Include="res\light.frag" />
-    <None Include="res\light.vert" />
-    <None Include="res\lamp.frag" />
-    <None Include="res\lamp.vert" />
     <None Include="src\ext\root_directory.h" />
+    <None Include="res\shaders\outline.frag" />
+    <None Include="res\shaders\lamp.vert" />
+    <None Include="res\shaders\light.frag" />
+    <None Include="res\shaders\light.vert" />
+    <None Include="res\shaders\lamp.frag" />
+    <None Include="res\shaders\grass.frag" />
+    <None Include="res\shaders\FrameBuffer.vert" />
+    <None Include="res\shaders\FrameBuffer.frag" />
+    <None Include="res\shaders\Cubemap.vert" />
+    <None Include="res\shaders\Cubemap.frag" />
+    <None Include="res\shaders\Reflective.vert" />
+    <None Include="res\shaders\Reflective.frag" />
+    <None Include="res\shaders\Default.vert" />
+    <None Include="res\shaders\Default.frag" />
   </ItemGroup>
 </Project>

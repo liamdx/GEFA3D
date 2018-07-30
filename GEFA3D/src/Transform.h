@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Common.h"
-class Transform
+#include "EngineComponent.h"
+class Transform : public EngineComponent
 {
 public: 
-	Transform()
+	Transform() : EngineComponent("Transform")
 	{
 		position = glm::vec3(0, 0, 0 );
 		rotationAngle = 0.0f;
@@ -12,19 +13,21 @@ public:
 		scale = glm::vec3(1, 1, 1);
 	}
 
-	Transform(Transform& parent)
+	Transform(Transform& parent) : EngineComponent("Transform")
 	{
 		position = glm::vec3(0, 0, 0);
 		rotationAngle = 0.0f;
 		rotationVector = glm::vec3(0, 0, 0);
 		scale = glm::vec3(1, 1, 1);
 		parentTransform = &parent;
-	} 
+	}
 
-	~Transform()
+	~Transform() override
 	{
 		
 	}
+
+	//Transform(const Transform* parent);
 
 	glm::vec3 position;
 	float rotationAngle;
@@ -60,10 +63,16 @@ public:
 	inline void setPosition(glm::vec3 newPosition) { position = newPosition; }
 	inline void setRotation(glm::vec3 newRotationVector, float angle) { rotationVector = newRotationVector; rotationAngle = angle; }
 	inline void setScale(glm::vec3 newScale) { position = newScale; }
-	inline void setParent(Transform parent) { parentTransform = &parent; }
-private:
-	Transform* parentTransform = nullptr;
+	inline void setParent(Transform* parent) { parentTransform = parent; }
+	inline void identity() { position = glm::vec3(0.0f); rotationAngle = 0.0f; rotationVector = glm::vec3(0.0f); scale = glm::vec3(1.0f); }
 
+	void updateBehaviour() override
+	{
+		std::cout << "Object scale - X: " << scale.x << " Y: " << scale.y << " Z: " << scale.z << std::endl;
+		std::cout << "Object position - X: " << position.x << " Y: " << position.y << " Z: " << position.z << std::endl;
+	}
+private:
+	Transform * parentTransform;
 	
 
 };
