@@ -964,5 +964,25 @@
     <None Include="res\shaders\Reflective.frag" />
     <None Include="res\shaders\Default.vert" />
     <None Include="res\shaders\Default.frag" />
+    <None Include="res\shaders\DefaultReflective.vert" />
+    <None Include="res\shaders\DefaultReflective.frag" />
+    <None Include="res\shaders\Shadowmap.vert" />
+    <None Include="res\shaders\Shadowmap.frag" />
+    <None Include="res\shaders\DepthMapDebug.frag" />
+    <None Include="res\shaders\Shadow.vert" />
+    <None Include="res\shaders\Shadow.frag" />
+    <None Include="res\shaders\DepthMapDebug.vert" />
+    <None Include="res\shaders\CubeDepthMap.vert" />
+    <None Include="res\shaders\CubeDepthMap.frag" />
+    <None Include="res\shaders\CubeMapDebug.vert" />
+    <None Include="res\shaders\CubeMapDebug.frag" />
+    <None Include="res\shaders\NormalMap.vert" />
+    <None Include="res\shaders\NormalMap.frag" />
+    <None Include="res\shaders\CubeDepthMap.geo" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\Downloads\Lowpoly_City_Free_Pack(1)\tex\Palette.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

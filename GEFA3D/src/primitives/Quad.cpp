@@ -95,3 +95,20 @@ screenQuad::~screenQuad()
 {
 
 }
+//
+//std::vector<float> debugQuad::getVertices(quadLocation screenLocation)
+//{
+//	
+//	if (screenLocation == 1)
+//	{
+//		std::vector<float> vertices = {}
+//	}
+//	if (screenLocation == 2)
+//	{
+//		std::vector<float> vertices = {}
+//	}
+//	if (screenLocation == 3)
+//	{
+//		std::vector<float> vertices = {}
+//	}
+//}

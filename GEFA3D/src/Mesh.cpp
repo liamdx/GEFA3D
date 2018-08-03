@@ -25,51 +25,41 @@ void Mesh::setupMesh()
 
 void Mesh::Draw(Shader shader)
 {
-	shader.setInt("NUMBER_OF_TEXTURES", textures.size());
-	int diffuseCount = 0;
-	int specularCount = 0;
-	int reflectionCount= 0;
-	std::stringstream ss_d;
-	std::stringstream ss_s;
-	std::stringstream ss_r;
-	std::string s;
+	int diffuseCount = 1;
+	int specularCount = 1;
+	int reflectionCount= 1;
+	int normalCount = 1;
+
 
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
 		if (textures[i].t_Type == "diffuse")
 		{
-			ss_d.clear();
-			//ss_d << "mat.m_Diffuse[" << diffuseCount << "]";
-			ss_d << "mat.m_Diffuse";
-			s = ss_d.str();
-			shader.setInt(s, i);
+			shader.setInt("mat.m_Diffuse", i);
 			diffuseCount += 1;
 			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
-			s.clear();
 		}
 		else if (textures[i].t_Type == "specular")
 		{
-			ss_s.clear();
-			//ss_s << "mat.m_Specular[" << specularCount << "]";
-			ss_s << "mat.m_Specular";
-			s = ss_s.str();
-			shader.setInt(s, i);
+			shader.setInt("mat.m_Specular", i);
 			specularCount += 1;
 			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
-			s.clear();
 		}
 		else if (textures[i].t_Type == "reflection")
 		{
-			ss_r.clear();
-			//ss_r << "mat.m_Reflection[" << reflectionCount << "]";
-			ss_r << "mat.m_Reflection";
-			s = ss_r.str();
-			shader.setInt(s, i);
+			shader.setInt("mat.m_Reflection", i);
 			reflectionCount += 1;
 			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
-			s.clear();
 		}
+
+		else if (textures[i].t_Type == "normal")
+		{
+			shader.setInt("mat.m_Normal", i);
+			normalCount += 1;
+			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
+		}
+	}
 		
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -77,7 +67,7 @@ void Mesh::Draw(Shader shader)
 		glBindVertexArray(0);
 
 	}
-}
+
 
 
 void Mesh::calcMeshBounds()

@@ -18,9 +18,6 @@ struct Texture {
 
 
 class Mesh : public EngineComponent {
-
-	
-
 public:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;

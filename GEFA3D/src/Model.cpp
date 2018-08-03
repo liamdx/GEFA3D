@@ -87,6 +87,10 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		//Reflection maps as ambient maps, this will obviously need corrected when PBR is implemented
 		std::vector<Texture> reflectionMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "reflection");
 		textures.insert(textures.end(), reflectionMaps.begin(), reflectionMaps.end());
+
+		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "normal");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+
 	}
 
 	return Mesh(vertices, indices, textures);
@@ -118,7 +122,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
 		{
 			Texture texture;
 			std::string textureLoadPath = directory + "/" + str.C_Str();
-
+			
 			texture.t_Id = TextureFromFile(textureLoadPath.c_str(), directory);
 			texture.t_Type = typeName;
 			std::cout << typeName << std::endl;
@@ -146,6 +150,7 @@ int Model::TextureFromFile(char const *path, const std::string& directory)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// load and generate the texture
 	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(false);
 	unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
 	std::cout << path << std::endl;
 	if (data)

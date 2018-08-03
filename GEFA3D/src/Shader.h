@@ -7,7 +7,8 @@ class Shader
 public:
 	unsigned int id;
 
-	Shader(const GLchar* vertexPath, const GLchar* fragPath);
+	Shader(const char* vertexPath, const char* fragPath);
+	Shader(const char* vertexPath,const char* geometryPath, const char* fragPath);
 	void use();
 	void setBool(const std::string &name, bool value) const;
 	void setInt(const std::string &name, int value) const;

@@ -21,7 +21,7 @@
 //Engine Time
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-const float timeStep = 1 / 60.0f;
+const float timeStep = 1 / 120.0f;
 
 //camera;
 float lastX;
@@ -40,8 +40,8 @@ std::vector<PointLight> pointLights;
 std::vector<SpotLight> spotLights;
 
 
-const unsigned int SCREEN_WIDTH = 1600;
-const unsigned int SCREEN_HEIGHT = 900;
+const unsigned int SCREEN_WIDTH = 1280;
+const unsigned int SCREEN_HEIGHT = 720;
 
 // We don't care for a profiler. This definition does nothing.
 void b3BeginProfileScope(const char* name)
@@ -100,15 +100,7 @@ int main(void)
 
 	//Enable depth
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
-
-	glEnable(GL_PROGRAM_POINT_SIZE);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+	glEnable(GL_CULL_FACE);
 
 	cam.MovementSpeed = 10.0f;
 	//Physics
@@ -167,6 +159,7 @@ int main(void)
 
 	std::string nanoPath = "res/models/nanosuit_reflection/nanosuit.obj";
 	Model nano(nanoPath);
+	//std::string terrainPath = "res/models/sponza_obj/sponza.obj";
 	std::string terrainPath = "res/models/sponza_obj/sponza.obj";
 	Model terrain(terrainPath);
 
@@ -186,29 +179,26 @@ int main(void)
 
 	//Test objects
 
-	Shader lightShader("res/shaders/light.vert", "res/shaders/light.frag");
+	Shader defaultShader("res/shaders/Default.vert", "res/shaders/Default.frag");
 	Shader lampShader("res/shaders/lamp.vert", "res/shaders/lamp.frag");
 	Shader outlineShader("res/shaders/default.vert", "res/shaders/outline.frag");
 	Shader grassShader("res/shaders/default.vert", "res/shaders/grass.frag");
 	Shader fbShader("res/shaders/FrameBuffer.vert", "res/shaders/FrameBuffer.frag");
 	Shader cubemapShader("res/shaders/Cubemap.vert", "res/shaders/Cubemap.frag");
-	Shader reflectionShader("res/shaders/Reflective.vert", "res/shaders/Reflective.frag");
-	Shader reflectionMapShader("res/shaders/Default.vert", "res/shaders/Default.frag");
+	Shader reflectionMapShader("res/shaders/DefaultReflective.vert", "res/shaders/DefaultReflective.frag");
+	Shader shadowMapDepthShader("res/shaders/Shadowmap.vert", "res/shaders/Shadowmap.frag");
+	Shader cubemapShadowDepthShader("res/shaders/CubeDepthMap.vert", "res/shaders/CubeDepthMap.geo", "res/shaders/CubeDepthMap.frag");
+	Shader shadowShader("res/shaders/Shadow.vert", "res/shaders/Shadow.frag");
+	Shader normalShader("res/shaders/NormalMap.vert", "res/shaders/NormalMap.frag");
+	Shader DebugDepthShader("res/shaders/DepthMapDebug.vert", "res/shaders/DepthMapDebug.frag");
 
-	Cube cube("C:/Users/Liam/Documents/GitHub/GEFA3D/GEFA3D/res/textures/green.jpg");
+	Cube cube("res/textures/green.jpg");
 	Cube reflectiveCube;
 	Quad quad("res/textures/grass.png");
+	Quad shadowMapQuad;
 	screenQuad renderQuad;
 
-	/*std::vector<std::string> faces
-	{
-		"res/textures/envmap_violentdays/violentdays_rt.tga",
-		"res/textures/envmap_violentdays/violentdays_lf.tga",
-		"res/textures/envmap_violentdays/violentdays_up.tga",
-		"res/textures/envmap_violentdays/violentdays_dn.tga",
-		"res/textures/envmap_violentdays/violentdays_bk.tga",
-		"res/textures/envmap_violentdays/violentdays_ft.tga"
-	};*/
+
 
 	std::vector<std::string> faces
 	{
@@ -220,7 +210,7 @@ int main(void)
 		"res/textures/violentdays/violentdays_ft.tga"
 	};
 	Cubemap cubeMap(faces);
-
+	cubeMap.Bind(reflectionMapShader);
 
 
 	//mvp
@@ -266,27 +256,30 @@ int main(void)
 
 
 	DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.15f, 0.08f,0.061f), glm::vec3(0.96f, 0.48f, 0.27f), glm::vec3(0.91f, 0.31f, 0.101f));
+	//DirectionalLight dirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
 
 	//create pointlights
 	for (unsigned int i = 0; i < pointLightPositions.size(); i++)
 	{
-		pointLights.push_back(PointLight(pointLightPositions[i], glm::vec3(0.01, 0.01, 0.01), glm::vec3(1.0, 0.4, 0.2), glm::vec3(1.0, 0.5, 0.2), 0.65f, 7.9f));
+		pointLights.push_back(PointLight(pointLightPositions[i], glm::vec3(0.01, 0.01, 0.01), glm::vec3(1.0, 0.4, 0.2), glm::vec3(1.0, 0.5, 0.2), 0.65f, 1.0f));
 
 	}
 
 	//Imgui debug values
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-	ImVec4 lightposition = ImVec4(0.571f, 10.286f, 2.60f, 1.00f);
+	ImVec4 lightposition = ImVec4(-2.0f, 4.0f, -1.0f, 1.00f);
 	ImVec4 lightambient = ImVec4(0.5f, 0.5f, 0.5f, 1.00f);
-	ImVec4 lightdiffuse = ImVec4(3.429f, 2.0f, 3.429f, 1.00f);
+	ImVec4 lightcenter = ImVec4(0.0f, 3.5f, 0.0f, 1.00f);
 	ImVec4 lightspecular = ImVec4(3.429f, 2.0f, 3.429f, 1.00f);
 	ImVec4 lightattenuation = ImVec4(1.0, 0.22f, 0.20f, 1.00f);
+	ImVec4 plposition = ImVec4(1.0, 5.0, 2.0, 1.0);
 	float lightintensity = 1.0f;
 	ImVec4 testposition = ImVec4(0.45f, 2.0f, 0.60f, 1.00f);
 	ImVec4 framebufferPosition = ImVec4(0.0f,0.0f,0.0f,0.0f);
 	ImVec4 framebufferViewPosition = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 	cam.Position = glm::vec3(0.0, 9.0, 10.0);
-
+	float gamma = 1.0f;
+	float reflectionIntensity = 1.0f;
 
 	//Framebuffer
 	//Frame buffer set up
@@ -316,29 +309,91 @@ int main(void)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	cubeMap.Bind(reflectionMapShader);
+	// Directional Shadow mapping
+	unsigned int depthMapFBO;
+	glGenFramebuffers(1, &depthMapFBO);
+	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	
-	
+	//Point light shadowmapping
+	//use cubemap to store depth information
+	unsigned int depthCubemap, depthCubemapFBO;
+	glGenFramebuffers(1, &depthCubemapFBO);
+	glGenTextures(1, &depthCubemap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
+			SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, depthCubemapFBO);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//Debug pointlight position
+	glm::vec3 pointLightPosition;
+
+	//debug omni shadowmaps
+
+	unsigned int debugOmniMap, debugOmniMapFBO;
+	glGenFramebuffers(1, &debugOmniMapFBO);
+	glGenTextures(1, &debugOmniMap);
+	glBindTexture(GL_TEXTURE_2D, debugOmniMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glBindFramebuffer(GL_FRAMEBUFFER, debugOmniMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, debugOmniMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	/*
 	//GameObject stuff
-	//Object testobject("testObject");
-	/*testobject.addComponent(new DebugEngineComponent());
+	Object testobject("testObject");
+	testobject.addComponent(new DebugEngineComponent());
 	testobject.addComponent(new Transform());
 	Mesh testMesh = nano.meshes[0];
 	testobject.addComponent(new Mesh(testMesh.vertices, testMesh.indices, testMesh.textures));
 	*/
 
-	/* Loop until the user closes the window */
+	// Loop until the user closes the window 
+
 		while (!glfwWindowShouldClose(window))
 		{
 
 			
-
+			//Engine time
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
 
+			//Refresh input
 			processInput(window);
-			offsetValue = (sin(currentFrame) / 2.0f);
 
 			//Refresh ui window
 			ImGui_ImplGlfwGL3_NewFrame();
@@ -346,31 +401,155 @@ int main(void)
 			// Perform a time step of the world in this frame.
 			world->Step(deltaTime, velocityIterations, positionIterations);
 			
+			//Clear buffers
+			glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+			
+			// Directional Shadow map
+			//Configure shadow matrix and shader stuff
+			float near_plane = 0.1f, far_plane = 100.0f;
+			glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+			glm::mat4 lightView = glm::lookAt(glm::vec3(lightposition.x, lightposition.y, lightposition.z),
+				glm::vec3(lightcenter.x, lightcenter.y, lightcenter.z),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+			shadowMapDepthShader.use();
+			shadowMapDepthShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glCullFace(GL_FRONT);
+
+			//Render the scene using the directional map shader
+			model = glm::mat4(1.0);
+			model = glm::translate(model, glm::vec3(0.0f, 3.5f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
+			shadowMapDepthShader.setMat4("model", model);
+			terrain.Draw(shadowMapDepthShader);
+
+			//use Bounce to calculate rib's position;
+			b3Vec3 position = body->GetPosition();
+			b3Quat orientation = body->GetOrientation();
+			b3Vec3 axis;
+			float32 angle;
+			orientation.GetAxisAngle(&axis, &angle);
+
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(position.x, position.y, position.z));
+			model = glm::rotate(model, angle, glm::vec3(axis.x, axis.y, axis.z));
+			model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+			shadowMapDepthShader.setMat4("model", model);
+			nano.Draw(shadowMapDepthShader);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			//Directional shadow map complete
+
+			//Omni pointlight shadowmap
+			pointLightPosition = glm::vec3(plposition.x, plposition.y, plposition.z);
+			glBindFramebuffer(GL_FRAMEBUFFER, depthCubemapFBO);
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+			float aspect = (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT;
+			glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspect, near_plane, far_plane);
+			
+			//depth map for each face of the cubemap texture
+			std::vector<glm::mat4> shadowTransforms;
+			shadowTransforms.push_back(shadowProj *	glm::lookAt(pointLightPosition, pointLightPosition + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			shadowTransforms.push_back(shadowProj *	glm::lookAt(pointLightPosition, pointLightPosition + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			shadowTransforms.push_back(shadowProj *	glm::lookAt(pointLightPosition, pointLightPosition + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+			shadowTransforms.push_back(shadowProj *	glm::lookAt(pointLightPosition, pointLightPosition + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+			shadowTransforms.push_back(shadowProj *	glm::lookAt(pointLightPosition, pointLightPosition + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+			shadowTransforms.push_back(shadowProj *	glm::lookAt(pointLightPosition, pointLightPosition + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+
+
+			//Setup cubemap shadowmap shader
+			cubemapShadowDepthShader.use();
+			cubemapShadowDepthShader.setMat4("shadowMatrices[0]", shadowTransforms[0]);
+			cubemapShadowDepthShader.setMat4("shadowMatrices[1]", shadowTransforms[1]);
+			cubemapShadowDepthShader.setMat4("shadowMatrices[2]", shadowTransforms[2]);
+			cubemapShadowDepthShader.setMat4("shadowMatrices[3]", shadowTransforms[3]);
+			cubemapShadowDepthShader.setMat4("shadowMatrices[4]", shadowTransforms[4]);
+			cubemapShadowDepthShader.setMat4("shadowMatrices[5]", shadowTransforms[5]);
+			cubemapShadowDepthShader.setFloat("far_plane", far_plane);
+			cubemapShadowDepthShader.setVec3("lightPos", pointLightPosition);
+
+			//Draw scene using Cubemap shadowmap shader
+			model = glm::mat4(1.0);
+			model = glm::translate(model, glm::vec3(0.0f, 3.5f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
+			cubemapShadowDepthShader.setMat4("model", model);
+			terrain.Draw(cubemapShadowDepthShader);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(position.x, position.y, position.z));
+			model = glm::rotate(model, angle, glm::vec3(axis.x, axis.y, axis.z));
+			model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+			cubemapShadowDepthShader.setMat4("model", model);
+			nano.Draw(cubemapShadowDepthShader);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			//point light shadow map complete
+
+
+			//Render scene normally
+			glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glCullFace(GL_BACK);
+
 			//Framebuffer first pass
 			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 			glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // | GL_STENCIL_BUFFER_BIT included
-			glEnable(GL_DEPTH_TEST);
 			
-		
-			glStencilFunc(GL_ALWAYS, 1, 0xFF);
-			lightShader.use();
-			lightShader.setInt("NUMBER_OF_TEXTURES", 1);
-			lightShader.setInt("NOPL", 4);
-			lightShader.setInt("NOSL", 0);
-			lightShader.setVec3("viewPosition", cam.Position);
-			lightShader.setFloat("mat.m_Shininess", 64.0f);
+			defaultShader.use();
+			defaultShader.setInt("NOPL", 4);
+			defaultShader.setInt("NOSL", 0);
+			defaultShader.setVec3("viewPosition", cam.Position);
+			defaultShader.setFloat("mat.m_Shininess", 64.0f);
+
+			shadowShader.use();
+			shadowShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			shadowShader.setVec3("lightPosition", glm::vec3(lightposition.x, lightposition.y, lightposition.z));
+			shadowShader.setVec3("viewPosition", cam.Position);
+			shadowShader.setVec3("pointLightPosition", pointLightPosition);
+			shadowShader.setFloat("near_plane", near_plane);
+			shadowShader.setFloat("far_plane", far_plane);
+
+			normalShader.use();
+			normalShader.setVec3("lightPosition", glm::vec3(lightposition.x, lightposition.y, lightposition.z));
+			normalShader.setVec3("viewPosition", cam.Position);
+			normalShader.setVec3("pointLightPosition", pointLightPosition);
+
+
+
+			//bind directional and cubemap shadow maps to shadow shader
+			glActiveTexture(GL_TEXTURE15);
+			shadowShader.setInt("shadowMap", 15);
+			glBindTexture(GL_TEXTURE_2D, depthMap);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+			glActiveTexture(GL_TEXTURE14);
+			shadowShader.setInt("pointShadowMap", 14);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 
 			reflectionMapShader.use();
-			reflectionMapShader.setInt("NUMBER_OF_TEXTURES", 1);
 			reflectionMapShader.setInt("NOPL", 4);
 			reflectionMapShader.setInt("NOSL", 0);
 			reflectionMapShader.setFloat("mat.m_Shininess", 64.0f);
+			reflectionMapShader.setFloat("reflectionIntensity", reflectionIntensity);
+			
 			cubeMap.Bind(reflectionMapShader);
 
 			view = cam.GetViewMatrix();
-			lightShader.use();
-			dirLight.Bind(lightShader);
+			defaultShader.use();
+			dirLight.Bind(defaultShader);
 
 			reflectionMapShader.use();
 			dirLight.Bind(reflectionMapShader);
@@ -380,13 +559,12 @@ int main(void)
 			{
 				reflectionMapShader.use();
 				pointLights[i].Bind(reflectionMapShader, i);
-				lightShader.use();
-				pointLights[i].Bind(lightShader, i);
-
+				defaultShader.use();
+				pointLights[i].Bind(defaultShader, i);
 			}
 
-			glStencilMask(0x00);
-
+			// Draw with reflection shader
+			/*
 			model = glm::mat4(1.0);
 			model = glm::translate(model, glm::vec3(0.0f, 3.5f, 5.0f));
 			model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
@@ -397,56 +575,6 @@ int main(void)
 			reflectionMapShader.setVec3("viewPosition", cam.Position);
 			terrain.Draw(reflectionMapShader);
 
-			b3Vec3 position = body->GetPosition();
-			b3Quat orientation = body->GetOrientation();
-			b3Vec3 axis;
-			float32 angle;
-			orientation.GetAxisAngle(&axis, &angle);
-
-			
-
-
-			//reflection test
-			model = glm::mat4(1.0);
-			model = glm::translate(model, glm::vec3(2.0, 6.0, 5.0));
-			reflectionShader.use();
-			reflectionShader.setMat4("model", model);
-			reflectionShader.setMat4("view", view);
-			reflectionShader.setMat4("projection", projection);
-			reflectionShader.setVec3("cameraPosition", cam.Position);
-			reflectiveCube.Draw(reflectionShader, cubeMap.textureId);
-
-
-			//reflection map test
-			model = glm::mat4(1.0);
-			model = glm::translate(model, glm::vec3(lightposition.x, lightposition.y, lightposition.z));
-			model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
-			reflectionMapShader.use();
-			reflectionMapShader.setMat4("model", model);
-			reflectionMapShader.setMat4("view", view);
-			reflectionMapShader.setMat4("projection", projection);
-			reflectionMapShader.setVec3("viewPosition", cam.Position);
-			nano.Draw(reflectionMapShader);
-
-			//grass shader relied on deleted default.vert, update this soon
-			grassShader.use();
-			grassShader.setMat4("view", view);
-			grassShader.setMat4("projection", projection);\
-
-				for (unsigned int i = 0; i < 10; i++)
-				{
-					model = glm::mat4(1.0);
-					model = glm::translate(model, cubePositions[i]);
-					model = glm::scale(model, glm::vec3(3, 3, 3));
-					grassShader.setMat4("model", model);
-					quad.Draw(grassShader);
-
-				}
-
-
-			//Stencil
-			glStencilFunc(GL_ALWAYS, 1, 0xFF);
-			glStencilMask(0xFF);
 
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(position.x, position.y, position.z));
@@ -456,40 +584,95 @@ int main(void)
 			reflectionMapShader.setMat4("model", model);
 			reflectionMapShader.setMat4("view", view);
 			reflectionMapShader.setMat4("projection", projection);
-
+			reflectionMapShader.setVec3("viewPosition", cam.Position);
 			nano.Draw(reflectionMapShader);
 
-			glStencilFunc(GL_LESS, 1, 0xFF);
-			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-			glStencilMask(0x00);
-			glDisable(GL_DEPTH_TEST);
-			outlineShader.use();
-			model = glm::scale(model, glm::vec3(1.03f, 1.03f, 1.03f));
-			outlineShader.setMat4("view", view);
-			outlineShader.setMat4("projection", projection);
-			outlineShader.setMat4("model", model);
+			*/
+			
+			//Draw with shadow shader
+			/*
+			model = glm::mat4(1.0);
+			model = glm::translate(model, glm::vec3(0.0f, 3.5f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
+			shadowShader.use();
+			shadowShader.setMat4("model", model);
+			shadowShader.setMat4("view", view);
+			shadowShader.setMat4("projection", projection);
+			terrain.Draw(shadowShader);
 
-			nano.Draw(outlineShader);
-			glStencilFunc(GL_ALWAYS, 1, 0xFF);
-			glStencilMask(0xFF);
-			glEnable(GL_DEPTH_TEST);
-		
 
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(position.x, position.y, position.z));
+			model = glm::rotate(model, angle, glm::vec3(axis.x, axis.y, axis.z));
+			model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+			shadowShader.use();
+			shadowShader.setMat4("model", model);
+			shadowShader.setMat4("view", view);
+			shadowShader.setMat4("projection", projection);
+			
+			nano.Draw(shadowShader);
+			
+			*/
+
+			model = glm::mat4(1.0);
+			model = glm::translate(model, glm::vec3(0.0f, 3.5f, 0.0f));
+			model = glm::scale(model, glm::vec3(0.03f, 0.03f, 0.03f));
+			normalShader.use();
+			normalShader.setMat4("model", model);
+			normalShader.setMat4("view", view);
+			normalShader.setMat4("projection", projection);
+			terrain.Draw(normalShader);
+
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(position.x, position.y, position.z));
+			model = glm::rotate(model, angle, glm::vec3(axis.x, axis.y, axis.z));
+			model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+			normalShader.use();
+			normalShader.setMat4("model", model);
+			normalShader.setMat4("view", view);
+			normalShader.setMat4("projection", projection);
+
+			nano.Draw(normalShader);
+
+			lampShader.use();
+			model = glm::mat4(1.0);
+			model = glm::translate(model, pointLightPosition);
+			model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+			lampShader.setMat4("model", model);
+			lampShader.setMat4("view", view);
+			lampShader.setMat4("projection", projection);
+			reflectiveCube.Draw(lampShader);
+
+			cubemapShader.use();
 			cubeMap.Draw(cubemapShader, view, projection);
 
-			glEnable(GL_FRAMEBUFFER_SRGB);
+
+
 			//Framebuffer time
 			// second pass
 			glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
 			glDisable(GL_DEPTH_TEST);
 			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			fbShader.use();
+			fbShader.setFloat("gamma", gamma);
 			renderQuad.Draw(fbShader, "screenTexture", framebufferTexture);
+			glEnable(GL_DEPTH_TEST);
 
-			glDisable(GL_FRAMEBUFFER_SRGB);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+			glDisable(GL_DEPTH_TEST);
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
+			DebugDepthShader.use();
+			DebugDepthShader.setFloat("scaler", 0.25f);
+			DebugDepthShader.setFloat("offsetX", -0.75f);
+			DebugDepthShader.setFloat("offsetY", -0.75f);
+			renderQuad.Draw(DebugDepthShader, "depthMap", depthMap);
+
+
+			glEnable(GL_DEPTH_TEST);
 
 			//ui stuff
 			// 1. Show a simple window.
@@ -505,26 +688,21 @@ int main(void)
 						static float f = 0.0f;
 						static int counter = 0;
 						ImGui::Text("Debug Menu");
-	
+
 						// Display some text (you can use a format string too)        // Edit 1 float using a slider from 0.0f to 1.0f    
 						ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-						if (ImGui::BeginMenu("Point Light"))
-						{
-							ImGui::SliderFloat3("light pos", &lightposition.x, -40, 40);
-							ImGui::SliderFloat("Light intensity", &lightintensity, 0, 25);
-							ImGui::ColorEdit3("light ambient", (float*)&lightambient);
-							ImGui::ColorEdit3("light diffuse", (float*)&lightdiffuse);
-							ImGui::ColorEdit3("light specular", (float*)&lightspecular);
-							ImGui::DragFloat3("light attenuation", &lightattenuation.x, -2, 2);
-							ImGui::EndMenu();
-						}
 
+						ImGui::SliderFloat("Gamma", &gamma, -2, 2);
+						ImGui::SliderFloat("ReflectionIntensity", &reflectionIntensity, 0, 10);
+						ImGui::SliderFloat3("DirLight Position", &lightposition.x, -40, 40);
+						ImGui::SliderFloat3("DirLight Center", &lightcenter.x, -40, 40);
+						ImGui::SliderFloat3("PointLight position", &plposition.x, -20, 20);
 
 						ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 						if (ImGui::Button("addForce"))
 						{
-							body->ApplyForce(b3Vec3(10000, 10000.0f, 0), b3Vec3(1, 0, 0), true);
+							body->ApplyForce(b3Vec3(20000, 100000.0f, 0), b3Vec3(1, 0, 0), true);
 						}
 
 						ImGui::EndMenu();
@@ -569,6 +747,7 @@ int main(void)
 			//ui render
 			ImGui::Render();
 			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
+
 
 
 			/* Swap front and back buffers */
