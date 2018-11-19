@@ -6,10 +6,9 @@ Using LearnOpenGL.com to build up this project in to a game engine with toolset 
 
 # Current Progress
 
-Skeletal Animation
-Fake PBR
-Shadow mapping (point and directional light)
-Normal mapping
-Audio Backend implemnted (yse)
+    Skeletal Animation
+    Fake PBR
+    Shadow mapping (point and directional light)
+    Normal mapping
 
-![Imgur](https://imgur.com/a/INgZH8B.gif)
+![](demo.gif)
