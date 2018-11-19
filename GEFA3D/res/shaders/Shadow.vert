@@ -4,6 +4,8 @@
 layout (location=0) in vec3 position;
 layout (location=1) in vec3 inNormal;
 layout (location=2) in vec2 texCoords;
+layout (location=3) in vec2 tangents;
+layout (location=4) in vec2 bitangents;
 
 out VS_OUT {
 	vec3 normal;

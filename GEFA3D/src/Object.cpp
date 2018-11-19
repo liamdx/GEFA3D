@@ -3,7 +3,7 @@
 Object::Object(std::string name)
 	:name(name)
 {
-	transform.identity();
+	//transform.identity();
 
 }
 void Object::updateBehaviour()

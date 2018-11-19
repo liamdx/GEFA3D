@@ -54,12 +54,6 @@
     <ClCompile Include="src\ext\imgui\imgui_impl_glfw_gl3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MeshCollider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GameObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\primitives\Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -69,10 +63,34 @@
     <ClCompile Include="src\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\DebugEngineComponent.cpp">
+    <ClCompile Include="src\Cubemap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Cubemap.cpp">
+    <ClCompile Include="src\Examples\NormalTestExample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Examples\ShadowExample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Examples\ReflectionExample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Examples\PBRTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Examples\AnimationExample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\animation\AnimatedModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Examples\SoundExample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ext\imgui\ImGuiFileDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lighting\ShadowMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -563,19 +581,10 @@
     <ClInclude Include="src\ext\imgui\stb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\MeshCollider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\primitives\Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\primitives\Quad.h">
@@ -587,13 +596,55 @@
     <ClInclude Include="src\EngineComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\DebugEngineComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Cubemap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Examples\Example.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Examples\EngineCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PhysicsManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Examples\NormalTestExample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Examples\ShadowExample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Examples\ReflectionExample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OrbitCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Examples\PBRTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Examples\AnimationExample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\animation\AnimatedModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Examples\SoundExample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AudioManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ext\imgui\ImGuiFileDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lighting\ShadowMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -968,17 +1019,23 @@
     <None Include="res\shaders\DefaultReflective.frag" />
     <None Include="res\shaders\Shadowmap.vert" />
     <None Include="res\shaders\Shadowmap.frag" />
-    <None Include="res\shaders\DepthMapDebug.frag" />
     <None Include="res\shaders\Shadow.vert" />
     <None Include="res\shaders\Shadow.frag" />
-    <None Include="res\shaders\DepthMapDebug.vert" />
     <None Include="res\shaders\CubeDepthMap.vert" />
     <None Include="res\shaders\CubeDepthMap.frag" />
-    <None Include="res\shaders\CubeMapDebug.vert" />
-    <None Include="res\shaders\CubeMapDebug.frag" />
     <None Include="res\shaders\NormalMap.vert" />
     <None Include="res\shaders\NormalMap.frag" />
     <None Include="res\shaders\CubeDepthMap.geo" />
+    <None Include="res\shaders\Combined.frag" />
+    <None Include="res\shaders\Combined.vert" />
+    <None Include="res\shaders\PBR.vert" />
+    <None Include="res\shaders\PBR.frag" />
+    <None Include="res\shaders\Debug\DepthMapDebug.vert" />
+    <None Include="res\shaders\Debug\DepthMapDebug.frag" />
+    <None Include="res\shaders\Debug\CubeMapDebug.frag" />
+    <None Include="res\shaders\Debug\CubeMapDebug.vert" />
+    <None Include="res\shaders\Debug\BoneDebug.vert" />
+    <None Include="res\shaders\Debug\BoneDebug.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\Downloads\Lowpoly_City_Free_Pack(1)\tex\Palette.jpg">

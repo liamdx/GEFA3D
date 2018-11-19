@@ -3,7 +3,7 @@
 void Model::loadModel(std::string path)
 {
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
@@ -42,11 +42,24 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		vert.position.x = mesh->mVertices[i].x;
 		vert.position.y = mesh->mVertices[i].y;
 		vert.position.z = mesh->mVertices[i].z;
+
 		if (mesh->HasNormals())
 		{
 			vert.normal.x = mesh->mNormals[i].x;
 			vert.normal.y = mesh->mNormals[i].y;
 			vert.normal.z = mesh->mNormals[i].z;
+		}
+
+		if (mesh->HasTangentsAndBitangents())
+		{
+			
+			vert.tangent.x = mesh->mTangents[i].x;
+			vert.tangent.y = mesh->mTangents[i].y;
+			vert.tangent.z = mesh->mTangents[i].z;
+
+		}
+		else{
+			vert.tangent = glm::vec3(0.0f);
 		}
 		
 		if (mesh->mTextureCoords[0])
@@ -79,18 +92,24 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		
 
 		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
+		
 		//Assimp throws issues when importing reflection maps correctly, nano model stores 
 		//Reflection maps as ambient maps, this will obviously need corrected when PBR is implemented
 		std::vector<Texture> reflectionMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "reflection");
 		textures.insert(textures.end(), reflectionMaps.begin(), reflectionMaps.end());
+		
 
 		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "normal");
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
+		
+		//std::cout << diffuseMaps[0].t_Path << " diffuse map count: " << diffuseMaps.size() << std::endl;
+		//std::cout << diffuseMaps[0].t_Path << " specular map count: " << specularMaps.size() << std::endl;
+		//std::cout << diffuseMaps[0].t_Path << " reflection/ambient map count: " << reflectionMaps.size() << std::endl;
+		//std::cout << diffuseMaps[0].t_Path << " normal map count: " << normalMaps.size() << std::endl;
 	}
 
 	return Mesh(vertices, indices, textures);
@@ -153,21 +172,27 @@ int Model::TextureFromFile(char const *path, const std::string& directory)
 	stbi_set_flip_vertically_on_load(false);
 	unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
 	std::cout << path << std::endl;
-	if (data)
+
+	if (data != nullptr)
 	{
+
 		GLenum format;
+
 		if (nrChannels == 1)
 		{
 			format = GL_RED;
 		}
+
 		else if (nrChannels == 3)
 		{
 			format = GL_RGB;
 		}
+
 		else if (nrChannels == 4)
 		{
 			format = GL_RGBA;
 		}
+
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -175,7 +200,6 @@ int Model::TextureFromFile(char const *path, const std::string& directory)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 
 		stbi_image_free(data);
 
@@ -189,4 +213,66 @@ int Model::TextureFromFile(char const *path, const std::string& directory)
 	}
 
 	
+}
+
+
+
+int Model::CommonTextureLoad(std::string path)
+{
+	unsigned int id;
+	std::cout << path << std::endl;
+	glGenTextures(1, &id);
+
+	glBindTexture(GL_TEXTURE_2D, id);
+	// set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load and generate the texture
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(false);
+	const char* _path = path.c_str();
+	unsigned char *data = stbi_load(_path, &width, &height, &nrChannels, 0);
+	std::cout << path << std::endl;
+
+	if (data != nullptr)
+	{
+
+		GLenum format;
+
+		if (nrChannels == 1)
+		{
+			format = GL_RED;
+		}
+
+		else if (nrChannels == 3)
+		{
+			format = GL_RGB;
+		}
+
+		else if (nrChannels == 4)
+		{
+			format = GL_RGBA;
+		}
+
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+
+		return id;
+	}
+	else
+	{
+		std::cout << "Failed to load texture " << path << std::endl;
+		stbi_image_free(data);
+		return NULL;
+	}
+
 }

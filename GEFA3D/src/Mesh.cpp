@@ -19,22 +19,25 @@ void Mesh::setupMesh()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+
 
 	glBindVertexArray(0);
 }
 
 void Mesh::Draw(Shader shader)
 {
-	int diffuseCount = 1;
-	int specularCount = 1;
-	int reflectionCount= 1;
-	int normalCount = 1;
+	int diffuseCount = 0;
+	int specularCount = 0;
+	int reflectionCount= 0;
+	int normalCount = 0;
 
 
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
-		if (textures[i].t_Type == "diffuse")
+		if (textures[i].t_Type == "diffuse" )
 		{
 			shader.setInt("mat.m_Diffuse", i);
 			diffuseCount += 1;
@@ -46,14 +49,14 @@ void Mesh::Draw(Shader shader)
 			specularCount += 1;
 			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
 		}
-		else if (textures[i].t_Type == "reflection")
+		else if (textures[i].t_Type == "reflection" )
 		{
 			shader.setInt("mat.m_Reflection", i);
 			reflectionCount += 1;
 			glBindTexture(GL_TEXTURE_2D, textures[i].t_Id);
 		}
 
-		else if (textures[i].t_Type == "normal")
+		else if (textures[i].t_Type == "normal" )
 		{
 			shader.setInt("mat.m_Normal", i);
 			normalCount += 1;
@@ -63,11 +66,22 @@ void Mesh::Draw(Shader shader)
 		
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-		glActiveTexture(GL_TEXTURE0);
+		for (int i = 0; i < textures.size(); i++)
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 		glBindVertexArray(0);
 
 	}
 
+void Mesh::TestDraw(Shader shader)
+{
+	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+}
 
 
 void Mesh::calcMeshBounds()

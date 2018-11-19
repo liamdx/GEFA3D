@@ -8,38 +8,33 @@ struct Vertex {
 	glm::vec3 position;
 	glm::vec3 normal;
 	glm::vec2 TexCoords;
-};
-
-struct Texture {
-	unsigned int t_Id;
-	std::string t_Type;
-	std::string t_Path;
+	glm::vec3 tangent;
 };
 
 
-class Mesh : public EngineComponent {
+
+
+class Mesh  {
 public:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
 
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) : EngineComponent("Mesh") 
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) 
 	{
 		this->vertices = vertices;
 		this->indices = indices;
 		this->textures = textures;
-		this->transform = new Transform();
 
-		calcMeshBounds();
+		//calcMeshBounds();
 		setupMesh();
 	};
 
 	void Draw(Shader shader);
+	void TestDraw(Shader shader);
 	void calcMeshBounds();
 	//physics position;
-	b3MeshShape collisionShape;
-	Transform* transform;
-private:
+
 	unsigned int vao, vbo, ibo;
 	void setupMesh();
 	float xBound, yBound, zBound;

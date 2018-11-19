@@ -70,3 +70,14 @@ void Cube::Draw(Shader shader,  unsigned int skyboxId)
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glActiveTexture(GL_TEXTURE0);
 }
+
+void Cube::TestDraw(Shader shader)
+{
+	glDisable(GL_CULL_FACE);
+
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glActiveTexture(GL_TEXTURE0);
+	
+	glEnable(GL_CULL_FACE);
+}

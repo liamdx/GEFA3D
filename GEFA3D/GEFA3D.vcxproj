@@ -76,13 +76,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)deps\GLFW\include;$(SolutionDir)deps\GLEW\include;$(SolutionDir)GEFA3D\src\ext;$(SolutionDir)GEFA3D\src;$(SolutionDir)deps\assimp\include;$(SolutionDir)deps\bounce\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)deps\GLFW\include;$(SolutionDir)deps\GLEW\include;$(SolutionDir)GEFA3D\src\ext;$(SolutionDir)GEFA3D\src;$(SolutionDir)deps\assimp\include;$(SolutionDir)deps\bounce\include;$(SolutionDir)deps\libyse\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4496;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)deps\GLFW\lib-vc2015;$(SolutionDir)deps\GLEW\lib\Release\Win32;$(SolutionDir)deps\assimp\lib;$(SolutionDir)deps\bounce\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;Shell32.lib;Gdi32.lib;User32.lib;assimp-vc140-mt.lib;bounce.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)deps\GLFW\lib-vc2015;$(SolutionDir)deps\GLEW\lib\Release\Win32;$(SolutionDir)deps\assimp\lib;$(SolutionDir)deps\bounce\lib;$(SolutionDir)deps\libyse\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;Shell32.lib;Gdi32.lib;User32.lib;assimp-vc140-mt.lib;bounce.lib;libyse32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -92,6 +92,9 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;Shell32.lib;Gdi32.lib;User32.lib;assimp-vc140-mt.lib;bounce.lib;libyse32.lib</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -101,15 +104,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)deps\GLFW\include;$(SolutionDir)deps\GLEW\include;$(SolutionDir)GEFA3D\src\ext;$(SolutionDir)GEFA3D\src;$(SolutionDir)deps\assimp\include;$(SolutionDir)deps\bounce\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)deps\GLFW\include;$(SolutionDir)deps\GLEW\include;$(SolutionDir)GEFA3D\src\ext;$(SolutionDir)GEFA3D\src;$(SolutionDir)deps\assimp\include;$(SolutionDir)deps\bounce\include;$(SolutionDir)deps\libyse\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4496;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)deps\GLFW\lib-vc2015;$(SolutionDir)deps\GLEW\lib\Release\Win32;$(SolutionDir)deps\assimp\lib;$(SolutionDir)deps\bounce\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;Shell32.lib;Gdi32.lib;User32.lib;assimp-vc140-mt.lib;bounce.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)deps\GLFW\lib-vc2015;$(SolutionDir)deps\GLEW\lib\Release\Win32;$(SolutionDir)deps\assimp\lib;$(SolutionDir)deps\bounce\lib;$(SolutionDir)deps\libyse\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;Shell32.lib;Gdi32.lib;User32.lib;assimp-vc140-mt.lib;bounce.lib;libyse32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -124,24 +127,31 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;Shell32.lib;Gdi32.lib;User32.lib;assimp-vc140-mt.lib;bounce.lib;libyse32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\animation\AnimatedModel.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Cubemap.cpp" />
-    <ClCompile Include="src\DebugEngineComponent.cpp" />
+    <ClCompile Include="src\Examples\AnimationExample.cpp" />
+    <ClCompile Include="src\Examples\NormalTestExample.cpp" />
+    <ClCompile Include="src\Examples\PBRTest.cpp" />
+    <ClCompile Include="src\Examples\ReflectionExample.cpp" />
+    <ClCompile Include="src\Examples\ShadowExample.cpp" />
+    <ClCompile Include="src\Examples\SoundExample.cpp" />
     <ClCompile Include="src\ext\imgui\imgui.cpp" />
+    <ClCompile Include="src\ext\imgui\ImGuiFileDialog.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\ext\imgui\imgui_impl_glfw_gl3.cpp" />
-    <ClCompile Include="src\GameObject.cpp" />
     <ClCompile Include="src\lighting\DirectionalLight.cpp" />
     <ClCompile Include="src\ext\glm\detail\glm.cpp" />
     <ClCompile Include="src\ext\stb_image\stb_image.cpp" />
     <ClCompile Include="src\lighting\PointLight.cpp" />
+    <ClCompile Include="src\lighting\ShadowMap.cpp" />
     <ClCompile Include="src\lighting\SpotLight.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
-    <ClCompile Include="src\MeshCollider.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Object.cpp" />
     <ClCompile Include="src\primitives\Cube.cpp" />
@@ -149,21 +159,31 @@
     <ClCompile Include="src\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\animation\AnimatedModel.h" />
+    <ClInclude Include="src\AudioManager.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Common.h" />
     <ClInclude Include="src\Cubemap.h" />
-    <ClInclude Include="src\DebugEngineComponent.h" />
     <ClInclude Include="src\EngineComponent.h" />
+    <ClInclude Include="src\Examples\AnimationExample.h" />
+    <ClInclude Include="src\Examples\EngineCore.h" />
+    <ClInclude Include="src\Examples\Example.h" />
+    <ClInclude Include="src\Examples\NormalTestExample.h" />
+    <ClInclude Include="src\Examples\PBRTest.h" />
+    <ClInclude Include="src\Examples\ReflectionExample.h" />
+    <ClInclude Include="src\Examples\ShadowExample.h" />
+    <ClInclude Include="src\Examples\SoundExample.h" />
     <ClInclude Include="src\ext\filesystem.h" />
     <ClInclude Include="src\ext\imgui\imconfig.h" />
     <ClInclude Include="src\ext\imgui\imgui.h" />
+    <ClInclude Include="src\ext\imgui\ImGuiFileDialog.h" />
     <ClInclude Include="src\ext\imgui\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="src\ext\imgui\imgui_internal.h" />
     <ClInclude Include="src\ext\imgui\stb_rect_pack.h" />
     <ClInclude Include="src\ext\imgui\stb_textedit.h" />
     <ClInclude Include="src\ext\imgui\stb_truetype.h" />
     <ClInclude Include="src\FrameBuffer.h" />
-    <ClInclude Include="src\GameObject.h" />
+    <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\lighting\DirectionalLight.h" />
     <ClInclude Include="src\ext\glm\common.hpp" />
     <ClInclude Include="src\ext\glm\detail\compute_vector_relational.hpp" />
@@ -312,31 +332,36 @@
     <ClInclude Include="src\ext\glm\vector_relational.hpp" />
     <ClInclude Include="src\ext\stb_image\stb_image.h" />
     <ClInclude Include="src\lighting\PointLight.h" />
+    <ClInclude Include="src\lighting\ShadowMap.h" />
     <ClInclude Include="src\lighting\SpotLight.h" />
     <ClInclude Include="src\Mesh.h" />
-    <ClInclude Include="src\MeshCollider.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\Object.h" />
+    <ClInclude Include="src\OrbitCamera.h" />
+    <ClInclude Include="src\PhysicsManager.h" />
     <ClInclude Include="src\primitives\Cube.h" />
     <ClInclude Include="src\primitives\Quad.h" />
     <ClInclude Include="src\Scene.h" />
     <ClInclude Include="src\Shader.h" />
-    <ClInclude Include="src\Transform.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\shaders\Combined.frag" />
+    <None Include="res\shaders\Combined.vert" />
     <None Include="res\shaders\CubeDepthMap.frag" />
     <None Include="res\shaders\CubeDepthMap.geo" />
     <None Include="res\shaders\CubeDepthMap.vert" />
     <None Include="res\shaders\Cubemap.frag" />
     <None Include="res\shaders\Cubemap.vert" />
-    <None Include="res\shaders\CubeMapDebug.frag" />
-    <None Include="res\shaders\CubeMapDebug.vert" />
+    <None Include="res\shaders\Debug\BoneDebug.frag" />
+    <None Include="res\shaders\Debug\BoneDebug.vert" />
+    <None Include="res\shaders\Debug\CubeMapDebug.frag" />
+    <None Include="res\shaders\Debug\CubeMapDebug.vert" />
     <None Include="res\shaders\Default.frag" />
     <None Include="res\shaders\Default.vert" />
     <None Include="res\shaders\DefaultReflective.frag" />
     <None Include="res\shaders\DefaultReflective.vert" />
-    <None Include="res\shaders\DepthMapDebug.frag" />
-    <None Include="res\shaders\DepthMapDebug.vert" />
+    <None Include="res\shaders\Debug\DepthMapDebug.frag" />
+    <None Include="res\shaders\Debug\DepthMapDebug.vert" />
     <None Include="res\shaders\FrameBuffer.frag" />
     <None Include="res\shaders\FrameBuffer.vert" />
     <None Include="res\shaders\grass.frag" />
@@ -347,6 +372,8 @@
     <None Include="res\shaders\NormalMap.frag" />
     <None Include="res\shaders\NormalMap.vert" />
     <None Include="res\shaders\outline.frag" />
+    <None Include="res\shaders\PBR.frag" />
+    <None Include="res\shaders\PBR.vert" />
     <None Include="res\shaders\Reflective.frag" />
     <None Include="res\shaders\Reflective.vert" />
     <None Include="res\shaders\Shadow.frag" />

@@ -60,7 +60,6 @@ out vec4 FragColor;
 
 uniform Material mat;
 uniform samplerCube skybox;
-uniform sampler2D shadowMap;
 
 uniform int NOSL;
 uniform int NOPL;

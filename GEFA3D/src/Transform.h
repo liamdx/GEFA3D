@@ -1,4 +1,5 @@
 #pragma once
+/*
 
 #include "Common.h"
 #include "EngineComponent.h"
@@ -8,8 +9,7 @@ public:
 	Transform() : EngineComponent("Transform")
 	{
 		position = glm::vec3(0, 0, 0 );
-		rotationAngle = 0.0f;
-		rotationVector = glm::vec3(0, 0, 0);
+		eulerAngles = glm::vec3(0.0f);
 		scale = glm::vec3(1, 1, 1);
 	}
 
@@ -30,15 +30,15 @@ public:
 	//Transform(const Transform* parent);
 
 	glm::vec3 position;
-	float rotationAngle;
-	glm::vec3 rotationVector;
+	glm::vec3 eulerAngles;
 	glm::vec3 scale;
-
 	glm::mat4 getModelMatrix()
 	{
 		glm::mat4 model = glm::mat4(1.0);
 		model = glm::translate(model, position);
-		model = glm::rotate(model, rotationAngle, rotationVector);
+		model = glm::rotate(model, eulerAngles.x, glm::vec3(1, 0, 0));
+		model = glm::rotate(model, eulerAngles.y, glm::vec3(0, 1, 0));
+		model = glm::rotate(model, eulerAngles.z, glm::vec3(0, 0, 1));
 		model = glm::scale(model, scale);
 
 		if (parentTransform == nullptr)
@@ -65,14 +65,15 @@ public:
 	inline void setScale(glm::vec3 newScale) { position = newScale; }
 	inline void setParent(Transform* parent) { parentTransform = parent; }
 	inline void identity() { position = glm::vec3(0.0f); rotationAngle = 0.0f; rotationVector = glm::vec3(0.0f); scale = glm::vec3(1.0f); }
-
-	void updateBehaviour() override
+	
+	glm::quat eulerToQuat(glm::vec3 eulerAngles)
 	{
-		std::cout << "Object scale - X: " << scale.x << " Y: " << scale.y << " Z: " << scale.z << std::endl;
-		std::cout << "Object position - X: " << position.x << " Y: " << position.y << " Z: " << position.z << std::endl;
+		return 
 	}
+
 private:
 	Transform * parentTransform;
 	
 
 };
+*/

@@ -1,6 +1,8 @@
 #version 440
+
 out vec4 FragColor;
 in vec3 TexCoords;
+
 uniform samplerCube cubemap;
 
 void main() 
