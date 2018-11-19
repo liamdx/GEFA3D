@@ -12,4 +12,4 @@ Shadow mapping (point and directional light)
 Normal mapping
 Audio Backend implemnted (yse)
 
-![Imgur](https://imgur.com/a/INgZH8B)
+![Imgur](https://imgur.com/a/INgZH8B.gif)
