@@ -1,9 +1,15 @@
 #   GEFA3D
 
-3D Application made using C++ and OpenGL.
+3D Renderer, (one day) engine made using C++, YSE and OpenGL.
 
 Using LearnOpenGL.com to build up this project in to a game engine with toolset specifically designed for procedural audio
 
 # Current Progress
 
-![Imgur](http://imgur.com/4dFT9GE.jpg)
+Skeletal Animation
+Fake PBR
+Shadow mapping (point and directional light)
+Normal mapping
+Audio Backend implemnted (yse)
+
+![Imgur](https://imgur.com/a/INgZH8B)
