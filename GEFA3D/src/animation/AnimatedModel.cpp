@@ -1,11 +1,5 @@
 #include "AnimatedModel.h"
 
-
-
-
-
-
-
 #define POSITION_LOCATION    0
 #define TEX_COORD_LOCATION   1
 #define NORMAL_LOCATION      2
@@ -88,6 +82,21 @@ bool AnimatedModel::LoadMesh(const std::string& filepath)
 		printf("Error parsing '%s': '%s'\n", filepath.c_str(), m_Importer.GetErrorString());
 	}
 
+	for (int i = 0; i < 1; i++)
+	{/*
+		for (unsigned int i = 0; i < pAnimation->mNumChannels; i++) {
+			if (std::string(pAnimation->mChannels[i]->mNodeName.data) == NodeName) {
+				const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
+				return pNodeAnim;*/
+		std::map <std::string, const aiNodeAnim*> cm;
+		for (unsigned int j = 0; i < m_pScene->mAnimations[i]->mNumChannels; i++) {
+
+			cm[m_pScene->mAnimations[i]->mChannels[j]->mNodeName.data] = m_pScene->mAnimations[i] ->mChannels[j];
+
+		}
+
+		nodeMappings[m_pScene->mAnimations[i]] = cm;
+	}
 	// Make sure the VAO is not changed from the outside
 	glBindVertexArray(0);
 
@@ -121,6 +130,7 @@ bool AnimatedModel::InitFromScene(const aiScene* pScene, const std::string& File
 
 	unsigned int NumVertices = 0;
 	unsigned int NumIndices = 0;
+
 
 	// Count the number of vertices and indices
 	for (unsigned int i = 0; i <pScene->mNumMeshes; i++) {
@@ -744,14 +754,26 @@ void AnimatedModel::BoneTransform(float TimeInSeconds, std::vector<glm::mat4>& T
 
 const aiNodeAnim* AnimatedModel::FindNodeAnim(const aiAnimation* pAnimation, const std::string NodeName)
 {
+
 	//can this be done more efficiently?
-	for (unsigned int i = 0; i < pAnimation->mNumChannels; i++) {
+	/*for (unsigned int i = 0; i < pAnimation->mNumChannels; i++) {
 		const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
 
 		if (std::string(pNodeAnim->mNodeName.data) == NodeName) {
 			return pNodeAnim;
 		}
+	}*/
+
+
+	/*for (unsigned int i = 0; i < pAnimation->mNumChannels; i++) {
+		if (std::string(pAnimation->mChannels[i]->mNodeName.data) == NodeName) {
+			const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
+			return pNodeAnim;
+		}
 	}
 
+
+*/
+	return(nodeMappings[pAnimation][NodeName]);
 	return NULL;
 }

@@ -15,7 +15,4 @@
 #include "ext/imgui/imgui.h"
 #include "ext/imgui/imgui_impl_glfw_gl3.h"
 #include "EngineComponent.h"
-
-//#include "Transform.h"
-
 #include "Cubemap.h"

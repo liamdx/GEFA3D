@@ -33,8 +33,6 @@ public:
 	GLuint m_VAO;
 	GLuint m_Buffers[5];
 
-
-
 	struct MeshEntry {
 		MeshEntry()
 		{
@@ -137,6 +135,7 @@ private:
 	
 
 	std::vector<Texture> m_Textures;
+	std::map<const aiAnimation*, std::map<std::string, const aiNodeAnim* >> nodeMappings;
 
 	std::map<std::string, unsigned int> m_BoneMapping; // maps a bone name to its index
 	unsigned int m_NumBones;

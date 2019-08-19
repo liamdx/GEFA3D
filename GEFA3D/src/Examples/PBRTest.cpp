@@ -193,7 +193,6 @@ void PBRTest::update(float deltaTime)
 	model = glm::mat4(1.0);
 	model = glm::translate(model, glm::vec3(cubeLocation.x, cubeLocation.y, cubeLocation.z));
 	model = glm::scale(model, glm::vec3(scale.x, scale.y, scale.z));
-	//model = glm::rotate(model, 90.0f, glm::vec3(0, 0, 1));
 	PBRShader.setMat4("model", model);
 
 	cyborg.TestDraw(PBRShader);

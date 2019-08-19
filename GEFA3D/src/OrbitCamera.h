@@ -2,8 +2,6 @@
 
 #include "Common.h"
 
-
-
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class OrbitCamera
 {
@@ -77,11 +75,7 @@ public:
 	}
 
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-	void ProcessKeyboard(Camera_Movement direction, float deltaTime)
-	{
-		
-
-	}
+	void ProcessKeyboard(Camera_Movement direction, float deltaTime){}
 
 	// Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
 	void ProcessMouseMovement(float xoffset, float yoffset, float deltaTime, GLboolean constrainPitch = true)
@@ -89,34 +83,17 @@ public:
 		xoffset *= MouseSensitivity;
 		yoffset *= MouseSensitivity;
 
-
-		if (canMove)
-		{
+		if (canMove){
 			
-
 			theta += (xoffset - oldX) * 0.01f *deltaTime;
 			phi += (yoffset - oldY) * 0.01f * deltaTime;
 
-			if (theta >= 3.125f)
-			{
-				theta = -3.125f;
-			}
-			else if (theta <= -3.125f)
-			{
-				theta = 3.125f;
-			}
-			
+			if (theta >= 3.125f){ theta = -3.125f;}
+			else if (theta <= -3.125f){ theta = 3.125f;}
 
-			if (phi > 2.99)
-			{
-				phi = 2.999f;
-			}
-			else if (phi <= 0.05f)
-			{
-				phi = 0.05f;
-			}
-			
+			if (phi > 2.99)	 {phi = 2.999f;}
 
+			else if (phi <= 0.05f){ phi = 0.05f;}
 
 			oldX = theta;
 			oldY = phi;
@@ -124,40 +101,28 @@ public:
 			// Update Front, Right and Up Vectors using the updated Euler angles
 			updateCameraVectors();
 		}
-		else
-		{
+		else{
 
-			if (theta <= 0.05f)
-			{
+			if (theta <= 0.05f)	{
 				theta += oldX * -xoffset * 0.02f *deltaTime;
 				phi += oldY * yoffset * 0.02f * deltaTime;
 			}
-			else
-			{
+			else{
 				theta += oldX * xoffset * 0.02f *deltaTime;
 				phi += oldY * yoffset * 0.02f * deltaTime;
 			}
-
 
 			oldX = oldX * 0.85f ;
 			oldY = oldY * 0.89f ;
 
 			updateCameraVectors();
 		}
-			
-
-			
-
-			
-		
-
 	}
 
 	// Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
 	void ProcessMouseScroll(float yoffset)
 	{
-		if (canMove)
-		{
+		if (canMove){
 			if (Zoom >= 1.0f && Zoom <= 45.0f)
 				Zoom -= yoffset;
 			if (Zoom <= 1.0f)
@@ -165,10 +130,7 @@ public:
 			if (Zoom >= 45.0f)
 				Zoom = 45.0f;
 		}
-
 	}
-
-
 
 	// Don't forget to replace glm::lookAt with your own version
 	// view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -188,6 +150,5 @@ private:
 		Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 		Up = glm::normalize(glm::cross(Right, Front));
 	}
-
 	float M_PI = 3.14159;
 };

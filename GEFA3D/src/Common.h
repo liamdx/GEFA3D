@@ -25,9 +25,7 @@ const float SPEED = 2.5f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
 
-
-
-//External
+// Libs
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "ext/glm/glm.hpp"
@@ -37,36 +35,32 @@ const float ZOOM = 45.0f;
 #include "assimp\Importer.hpp"
 #include "assimp\scene.h"
 #include "assimp\postprocess.h"
-
 #include <string>
-
 #include <algorithm>
-
+#include <time.h>
 #include <fstream>
-
 #include <sstream>
-
 #include <vector>
-
 #include <iostream> 
-
 #include <memory>
-
 #include <map>
-
-//Image loader (STLI should work too)
 #include "ext\stb_image\stb_image.h"
-
-//Physics integration
 #include "bounce\bounce.h"
-
-//sound lib
 #include "yse.hpp"
 
 #define ZERO_MEM(a) memset(a, 0, sizeof(a))
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 #define SAFE_DELETE(p) if (p) { delete p; p = NULL; }
 
+
+
+#ifndef SYSOUT_F
+#define SYSOUT_F(f, ...)      _RPT1( 0, f, __VA_ARGS__ ) // For Visual studio
+#endif
+
+#ifndef speedtest__             
+#define speedtest__(data)   for (long blockTime = NULL; (blockTime == NULL ? (blockTime = clock()) != NULL : false); SYSOUT_F(data "%.9fs", (double) (clock() - blockTime) / CLOCKS_PER_SEC))
+#endif
 
 class common {
 public:
@@ -94,12 +88,4 @@ public:
 		newMatrix[3][3] = in_mat.d4;
 		return newMatrix;
 	};
-
-	//static aiMatrix4x4 GLMMat4ToAi(glm::mat4 mat)
-	//{
-	//	return aiMatrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3],
-	//		mat[1][0], mat[1][1], mat[1][2], mat[1][3],
-	//		mat[2][0], mat[2][1], mat[2][2], mat[2][3],
-	//		mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
-	//}
 };

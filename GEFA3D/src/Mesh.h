@@ -2,7 +2,7 @@
 
 #include "Common.h"
 #include "Shader.h"
-#include "Transform.h"
+
 
 struct Vertex {
 	glm::vec3 position;

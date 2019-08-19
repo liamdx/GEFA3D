@@ -2,10 +2,11 @@
 
 //#include "Examples\ShadowExample.h"
 //#include "Examples\NormalTestExample.h"
-//#include "Examples\PBRTest.h"
+//include "Examples\PBRTest.h"
 //#include "Examples\SoundExample.h"
 #include "Examples\AnimationExample.h"
 //#include "Examples\ReflectionExample.h"
+#include "glm/gtx/string_cast.hpp"
 
 //Engine Time
 float deltaTime = 0.0f;
@@ -51,6 +52,11 @@ int main(void)
 	if (!glfwInit())
 		return -1;
 
+
+	// glm::mat4 debugProjectionMatrix = glm::perspectiveFov(90.0f, 1600.0f, 900.0f, 0.1f, 200.0f);
+
+//	std::cout << "16:9 Projection Matrix = " << glm::to_string(debugProjectionMatrix) << std::endl;
+
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "GEFA3D", NULL, NULL);
 
@@ -79,7 +85,7 @@ int main(void)
 	SetImGuiStyle();
 
 	ImGuiIO& io = ImGui::GetIO();
-	ImFont* font = io.Fonts->AddFontFromFileTTF("res/font/Rubik-Light.ttf", 14.0f);
+	io.Fonts->AddFontFromFileTTF("res/font/Rubik-Light.ttf", 14.0f);
 
 	YSE::System().init();
 
@@ -93,8 +99,6 @@ int main(void)
 	//Mouse input handle
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	//glfwSetCursorPosCallback(window, test.input.mouse_callback);
 
 
 	//Physics
@@ -207,11 +211,8 @@ int main(void)
 
 
 
-
 	float timeValue;
 	float offsetValue;
-
-
 
 
 	//Framebuffer
@@ -242,17 +243,6 @@ int main(void)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glm::vec3 pointLightPosition;
-
-
-	/*
-	//GameObject stuff
-	Object testobject("testObject");
-	testobject.addComponent(new DebugEngineComponent());
-	testobject.addComponent(new Transform());
-	Mesh testMesh = nano.meshes[0];
-	testobject.addComponent(new Mesh(testMesh.vertices, testMesh.indices, testMesh.textures));
-	*/
 
 	// Loop until the user closes the window 
 
@@ -277,34 +267,22 @@ int main(void)
 			
 			//Clear buffers
 			glClearColor(0.0, 0.0f,0.0f,0.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-			
-			//use Bounce to calculate rib's position;
-			b3Vec3 position = body->GetPosition();
-			b3Quat orientation = body->GetOrientation();
-			b3Vec3 axis;
-			float32 angle;
-			orientation.GetAxisAngle(&axis, &angle);
-			
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );			
 
 			test.earlyUpdate(deltaTime);
 
 
-			//Render scene normally
+			//MAKE SURE WE Render scene normally
 			glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 			glCullFace(GL_BACK);
 
-			
 			//Framebuffer first pass
 			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // | GL_STENCIL_BUFFER_BIT included
 
+			// nothing drawn YET.
 			test.update(deltaTime);
-
-			
-
-
-			
+			// EVERYTHING drawn
 
 			//Framebuffer time
 			// second pass
@@ -317,21 +295,18 @@ int main(void)
 			fbShader.setFloat("gamma", gamma);
 			renderQuad.Draw(fbShader, "screenTexture", framebufferTexture);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+			
 
 			glEnable(GL_DEPTH_TEST);
 
-
 			test.UI();
 
-			//ui render
-			
-			ImGui::Render();
-			
+			//ui render	
+			ImGui::Render();	
 			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
 
-
 			YSE::System().update();
+
 			/* Swap front and back buffers */
 			glfwSwapBuffers(window);
 
